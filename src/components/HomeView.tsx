@@ -4,9 +4,9 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { SongCard } from './SongCard'
 import { searchYouTubeKaraoke } from '@/lib/youtubeApi'
-import { MagnifyingGlass, Warning, YoutubeLogo, CircleNotch, Lightning } from '@phosphor-icons/react'
+import { MagnifyingGlass, Warning, YoutubeLogo, CircleNotch } from '@phosphor-icons/react'
 import { Song } from '@/contexts/KaraokeContext'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { MicrophoneVisualizer } from './MicrophoneVisualizer'
 import { ResultsModal } from './ResultsModal'
 import { toast } from 'sonner'
@@ -20,22 +20,23 @@ export function HomeView() {
   const { 
     currentSong, 
     setCurrentSong, 
-    score, 
-    setScore, 
-    combo, 
-    setCombo, 
     playNext,
     addDiscoveredSong 
   } = useKaraoke()
+
+  const [score, setScore] = useState(0)
+  const [combo, setCombo] = useState(0)
 
   const [showResults, setShowResults] = useState(false)
   const [isReady, setIsReady] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [isCheckingCompatibility, setIsCheckingCompatibility] = useState(false)
   const [compatibilityError, setCompatibilityError] = useState<string | null>(null)
+  const [finalScore, setFinalScore] = useState(0)
   const scoreIntervalRef = useRef<number | undefined>(undefined)
   const comboIntervalRef = useRef<number | undefined>(undefined)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const playerReadyRef = useRef(false)
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
@@ -67,6 +68,8 @@ export function HomeView() {
     setCurrentSong(song)
     setScore(0)
     setCombo(0)
+    setFinalScore(0)
+    playerReadyRef.current = false
     toast.success('Tocando agora!', {
       description: `${song.title} - ${song.artist}`,
     })
@@ -80,6 +83,7 @@ export function HomeView() {
       setCompatibilityError(null)
       setHasError(false)
       setIsReady(false)
+      playerReadyRef.current = false
 
       try {
         const response = await fetch(
@@ -123,9 +127,18 @@ export function HomeView() {
     checkVideoCompatibility()
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin === 'https://www.youtube.com') {
+      if (event.origin === 'https://www.youtube.com' || event.origin === 'https://www.youtube-nocookie.com') {
         try {
-          const data = JSON.parse(event.data)
+          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data
+          
+          if (data.event === 'onStateChange') {
+            if (data.info === 0) {
+              handleSongEnd()
+            } else if (data.info === 1) {
+              playerReadyRef.current = true
+            }
+          }
+          
           if (data.event === 'infoDelivery' && data.info?.errorCode) {
             console.error('YouTube Player Error Code:', data.info.errorCode)
             if (data.info.errorCode === 150 || data.info.errorCode === 153 || data.info.errorCode === 101) {
@@ -152,18 +165,25 @@ export function HomeView() {
       const comboMultiplier = 1 + (combo * 0.1)
       const totalIncrease = Math.floor(baseIncrease * comboMultiplier)
       
-      setScore(score + totalIncrease)
+      setScore(prevScore => prevScore + totalIncrease)
     }, 2500)
 
     comboIntervalRef.current = window.setInterval(() => {
-      setCombo(Math.min(combo + 1, 10))
+      setCombo(prevCombo => Math.min(prevCombo + 1, 10))
     }, 3000)
 
     return () => {
       if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current)
       if (comboIntervalRef.current) clearInterval(comboIntervalRef.current)
     }
-  }, [currentSong, isReady, combo, score, setScore, setCombo])
+  }, [currentSong, isReady])
+
+  const handleSongEnd = () => {
+    if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current)
+    if (comboIntervalRef.current) clearInterval(comboIntervalRef.current)
+    setFinalScore(score)
+    setShowResults(true)
+  }
 
   const handlePlayerError = () => {
     if (!hasError) {
@@ -188,6 +208,7 @@ export function HomeView() {
     setCurrentSong(null)
     setScore(0)
     setCombo(0)
+    setFinalScore(0)
   }
 
   const handleResultsClose = () => {
@@ -197,6 +218,7 @@ export function HomeView() {
     setCurrentSong(null)
     setScore(0)
     setCombo(0)
+    setFinalScore(0)
   }
 
   const getErrorMessage = () => {
@@ -271,33 +293,6 @@ export function HomeView() {
               <h2 className="font-['Orbitron'] text-2xl font-bold uppercase tracking-wider text-foreground">
                 Agora Tocando
               </h2>
-              
-              <div className="flex items-center gap-6">
-                <AnimatePresence mode="wait">
-                  {combo > 0 && (
-                    <motion.div
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      exit={{ scale: 0, rotate: 180 }}
-                      className="flex items-center gap-2 px-3 py-1 rounded-full bg-accent/20 border border-accent/50"
-                    >
-                      <Lightning size={20} weight="fill" className="text-accent" />
-                      <span className="font-['Orbitron'] font-bold text-accent">
-                        x{combo}
-                      </span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <div className="text-right">
-                  <div className="font-['Orbitron'] text-3xl font-bold glow-text">
-                    {score.toLocaleString()}
-                  </div>
-                  <div className="font-['Exo_2'] text-xs text-muted-foreground uppercase tracking-wide">
-                    Score
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div className="bg-black rounded-lg overflow-hidden shadow-[0_0_40px_rgba(0,245,255,0.3)] neon-border aspect-video">
@@ -457,7 +452,7 @@ export function HomeView() {
       <ResultsModal
         open={showResults}
         onClose={handleResultsClose}
-        score={score}
+        score={finalScore}
         songTitle={currentSong?.title || ''}
         songArtist={currentSong?.artist || ''}
       />

@@ -26,12 +26,12 @@ Aplicação single-page focada exclusivamente em busca e reprodução de karaok�
 - **Progressão**: Clique em música → Player aparece no topo da página → Verificação de compatibilidade → Vídeo carrega → Reprodução inicia → Pontuação começa → Continua navegando resultados abaixo
 - **Critérios de sucesso**: Player sempre visível, não muda de página, resultados permanecem acessíveis, fácil trocar de música
 
-### Sistema de Pontuação com Combo
-- **Funcionalidade**: Score aumenta automaticamente durante reprodução, combo multiplica pontos
-- **Propósito**: Gamificação e engajamento durante a performance
-- **Gatilho**: Player inicia reprodução
-- **Progressão**: Música inicia → Score começa a aumentar (50-150 pontos/2.5s) → Combo aumenta a cada 3s → Multiplica pontuação → Display em tempo real
-- **Critérios de sucesso**: Números visíveis, animações suaves, combo visual destaca momentos especiais
+### Sistema de Pontuação ao Final da Música
+- **Funcionalidade**: Score acumula durante a reprodução em background e é revelado ao final com tela de congratulações
+- **Propósito**: Gamificação focada no resultado final, criando momento de celebração após performance
+- **Gatilho**: Música chega ao fim (detecção via YouTube Player API)
+- **Progressão**: Música inicia → Score acumula em background sem exibição → Combo aumenta internamente → Música termina → Modal aparece com pontuação final → Estrelas baseadas no score → Mensagem de parabéns aleatória → Botão para continuar
+- **Critérios de sucesso**: Transição suave para modal, pontuação final visível e celebratória, estrelas animadas (1-5 baseado em score), mensagens motivacionais em português
 
 ### Visualizador de Microfone
 - **Funcionalidade**: Barras animadas que reagem ao áudio do microfone do usuário
@@ -50,6 +50,8 @@ Aplicação single-page focada exclusivamente em busca e reprodução de karaok�
 - **Click Múltiplos Rápidos**: Debounce para prevenir múltiplas buscas simultâneas
 - **Primeira Visita**: Mensagem de boas-vindas explicando como usar o sistema
 - **Erro de Rede**: Mensagem clara de erro com opção de tentar novamente
+- **Música Termina Naturalmente**: Modal de congratulações com pontuação final, estrelas e mensagem motivacional
+- **Troca de Música Durante Reprodução**: Score atual é resetado, novo score começa a acumular
 
 ## Design Direction
 
@@ -82,7 +84,7 @@ Tipografia moderna e altamente legível com Inter como família principal.
 
 ## Animations
 
-Animações suaves e propositais: transições fade (300ms), hovers com scale sutil (1.02), player com verificação de compatibilidade animada, visualizador fluido reagindo ao áudio, score com efeito glow, combo com entrada rotacional dramática.
+Animações suaves e propositais: transições fade (300ms), hovers com scale sutil (1.02), player com verificação de compatibilidade animada, visualizador fluido reagindo ao áudio, modal de resultados com estrelas animadas entrando em rotação, efeito glow na pontuação final, mensagens com pulse para celebração.
 
 ## Component Selection
 

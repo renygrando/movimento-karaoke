@@ -13,16 +13,19 @@ interface ResultsModalProps {
 }
 
 const compliments = [
-  'A new star is born!',
-  'Audience is wild!',
-  'Absolutely stunning!',
-  'What a performance!',
-  'You nailed it!',
-  'Standing ovation!',
-  'Chart-topping talent!',
-  'Pure brilliance!',
-  'Encore! Encore!',
-  'Legendary performance!',
+  'Uma nova estrela nasceu!',
+  'A plateia está enlouquecida!',
+  'Simplesmente incrível!',
+  'Que apresentação espetacular!',
+  'Você arrasou!',
+  'De pé e aplaudindo!',
+  'Talento de primeira!',
+  'Pura genialidade!',
+  'Bis! Bis! Bis!',
+  'Performance lendária!',
+  'Mandou muito bem!',
+  'Show de bola!',
+  'Perfeito demais!',
 ]
 
 function getStarRating(score: number): number {
@@ -50,7 +53,7 @@ export function ResultsModal({ open, onClose, score, songTitle, songArtist }: Re
       <DialogContent className="glass-card border-primary/50 max-w-md">
         <DialogHeader>
           <DialogTitle className="font-['Orbitron'] text-3xl uppercase tracking-wider text-center glow-text">
-            Stage Clear!
+            🎉 Parabéns! 🎉
           </DialogTitle>
         </DialogHeader>
 
@@ -92,14 +95,14 @@ export function ResultsModal({ open, onClose, score, songTitle, songArtist }: Re
             ))}
           </div>
 
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2">
-              <span className="font-['Orbitron'] text-5xl font-bold glow-text">
+          <div className="text-center space-y-4">
+            <div className="space-y-2">
+              <div className="font-['Exo_2'] text-sm text-muted-foreground uppercase tracking-wide">
+                Sua Pontuação
+              </div>
+              <div className="font-['Orbitron'] text-6xl font-bold glow-text">
                 {score.toLocaleString()}
-              </span>
-              <span className="font-['Exo_2'] text-sm text-muted-foreground uppercase tracking-wide">
-                points
-              </span>
+              </div>
             </div>
             <p className="font-['Exo_2'] text-lg font-semibold text-accent glow-accent animate-pulse">
               {compliment}
@@ -108,17 +111,10 @@ export function ResultsModal({ open, onClose, score, songTitle, songArtist }: Re
 
           <div className="flex gap-3">
             <Button
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 font-['Exo_2'] font-medium uppercase tracking-wide"
-            >
-              Close
-            </Button>
-            <Button
               onClick={onClose}
               className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-['Exo_2'] font-medium uppercase tracking-wide hover:shadow-[0_0_15px_rgba(0,245,255,0.5)]"
             >
-              Next Song
+              Continuar
             </Button>
           </div>
         </div>
