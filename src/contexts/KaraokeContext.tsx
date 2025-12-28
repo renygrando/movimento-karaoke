@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { useKV } from '@github/spark/hooks'
+import { songDatabase } from '@/lib/songDatabase'
 
 export interface Song {
   id: string
@@ -64,12 +65,10 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useKV<string[]>('karaoke-favorites', [])
   const [playlists, setPlaylists] = useKV<Playlist[]>('karaoke-playlists', [])
   const [discoveredSongs, setDiscoveredSongs] = useKV<Record<string, Song>>('karaoke-discovered-songs', {})
-
-  const { songDatabase } = require('@/lib/songDatabase')
   
   const getSongById = useCallback((songId: string): Song | undefined => {
     return (discoveredSongs || {})[songId] || songDatabase.find((s: Song) => s.id === songId)
-  }, [discoveredSongs, songDatabase])
+  }, [discoveredSongs])
 
   const addDiscoveredSong = useCallback((song: Song) => {
     setDiscoveredSongs((current) => ({
