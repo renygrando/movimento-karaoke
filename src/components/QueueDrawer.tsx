@@ -10,7 +10,7 @@ import { ResultsModal } from './ResultsModal'
 import { Song } from '@/contexts/KaraokeContext'
 
 export function QueueDrawer() {
-  const { queue, removeFromQueue, playNext, currentSong, clearQueue, reorderQueue } = useKaraoke()
+  const { queue, removeFromQueue, playNext, currentSong, clearQueue, reorderQueue, setCurrentSong, setScore, setCombo } = useKaraoke()
   const [showAddSongModal, setShowAddSongModal] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -19,6 +19,18 @@ export function QueueDrawer() {
     toast.success('Removida da fila', {
       description: songTitle,
     })
+  }
+
+  const handlePlaySong = (song: Song, index: number) => {
+    const newQueue = [...queue]
+    newQueue.splice(index, 1)
+    reorderQueue(newQueue)
+    
+    setCurrentSong(song)
+    setScore(0)
+    setCombo(0)
+    setOpen(false)
+    toast.success('Iniciando música!')
   }
 
   const handlePlayNext = () => {
@@ -126,7 +138,8 @@ export function QueueDrawer() {
               {queue.map((song, index) => (
                 <div
                   key={`${song.id}-${index}`}
-                  className="group flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/30 hover:border-primary/50 transition-all"
+                  className="group flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/30 hover:border-primary/50 transition-all cursor-pointer"
+                  onClick={() => handlePlaySong(song, index)}
                 >
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                     <span className="font-['Orbitron'] text-sm font-bold text-primary">
@@ -134,12 +147,15 @@ export function QueueDrawer() {
                     </span>
                   </div>
 
-                  <div className="flex-shrink-0 w-20 h-12 rounded overflow-hidden">
+                  <div className="flex-shrink-0 w-20 h-12 rounded overflow-hidden relative">
                     <img
                       src={song.thumbnail}
                       alt={song.title}
                       className="w-full h-full object-cover"
                     />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Play size={24} weight="fill" className="text-white" />
+                    </div>
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -156,7 +172,10 @@ export function QueueDrawer() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => moveUp(index)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          moveUp(index)
+                        }}
                         className="h-8 w-8 p-0 hover:bg-secondary/50 text-foreground"
                         title="Mover para cima"
                       >
@@ -167,7 +186,10 @@ export function QueueDrawer() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => moveDown(index)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          moveDown(index)
+                        }}
                         className="h-8 w-8 p-0 hover:bg-secondary/50 text-foreground"
                         title="Mover para baixo"
                       >
@@ -177,7 +199,10 @@ export function QueueDrawer() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleRemove(song.id, song.title)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleRemove(song.id, song.title)
+                      }}
                       className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                       title="Remover"
                     >
@@ -193,7 +218,7 @@ export function QueueDrawer() {
         <div className="border-t border-border/30 p-4">
           <p className="text-center text-xs text-muted-foreground font-['Exo_2']">
             {queue.length > 0 
-              ? 'Passe o mouse sobre uma música para reordenar ou remover'
+              ? 'Clique em uma música para tocar imediatamente'
               : 'Adicione músicas à fila na tela inicial'
             }
           </p>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { KaraokeProvider, useKaraoke } from './contexts/KaraokeContext'
 import { HomeView } from './components/HomeView'
 import { StageView } from './components/StageView'
@@ -13,9 +13,11 @@ function AppContent() {
   const { currentSong } = useKaraoke()
   const [view, setView] = useState<'home' | 'stage' | 'playlists' | 'favorites'>('home')
 
-  const handleSongSelect = () => {
-    setView('stage')
-  }
+  useEffect(() => {
+    if (currentSong) {
+      setView('stage')
+    }
+  }, [currentSong])
 
   const handleBack = () => {
     setView('home')
@@ -23,13 +25,13 @@ function AppContent() {
 
   return (
     <>
-      {view === 'stage' ? (
+      {view === 'stage' && currentSong ? (
         <StageView onBack={handleBack} />
       ) : (
         <>
-          {view === 'home' && <HomeView onSongSelect={handleSongSelect} />}
+          {view === 'home' && <HomeView />}
           {view === 'playlists' && <PlaylistsView />}
-          {view === 'favorites' && <FavoritesView onSongSelect={handleSongSelect} />}
+          {view === 'favorites' && <FavoritesView />}
           
           <div className="fixed bottom-0 left-0 right-0 z-30 backdrop-blur-lg bg-background/80 border-t border-border/30 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
             <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-around gap-2">

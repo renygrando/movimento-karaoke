@@ -9,11 +9,7 @@ import { MagnifyingGlass } from '@phosphor-icons/react'
 import { Separator } from '@/components/ui/separator'
 import { Song } from '@/contexts/KaraokeContext'
 
-interface HomeViewProps {
-  onSongSelect: () => void
-}
-
-export function HomeView({ onSongSelect }: HomeViewProps) {
+export function HomeView() {
   const [searchQuery, setSearchQuery] = useState('')
   const [youtubeResults, setYoutubeResults] = useState<Song[]>([])
   const [isSearching, setIsSearching] = useState(false)
@@ -51,7 +47,6 @@ export function HomeView({ onSongSelect }: HomeViewProps) {
     setCurrentSong(song)
     setScore(0)
     setCombo(0)
-    onSongSelect()
   }
 
   return (

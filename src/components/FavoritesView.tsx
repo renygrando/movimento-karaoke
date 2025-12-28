@@ -2,11 +2,7 @@ import { useKaraoke } from '@/contexts/KaraokeContext'
 import { SongCard } from './SongCard'
 import { Heart } from '@phosphor-icons/react'
 
-interface FavoritesViewProps {
-  onSongSelect: () => void
-}
-
-export function FavoritesView({ onSongSelect }: FavoritesViewProps) {
+export function FavoritesView() {
   const { favorites, setCurrentSong, setScore, setCombo, getSongById, addDiscoveredSong } = useKaraoke()
 
   const favoriteSongs = favorites
@@ -18,7 +14,6 @@ export function FavoritesView({ onSongSelect }: FavoritesViewProps) {
     setCurrentSong(song)
     setScore(0)
     setCombo(0)
-    onSongSelect()
   }
 
   return (

@@ -1,197 +1,134 @@
 # Planning Guide
 
-Uma aplicação web de karaokê de alta fidelidade e interativa que transforma seu dispositivo em um palco neon, permitindo que você se apresente com suas músicas brasileiras favoritas com feedback visual em tempo real e pontuação gamificada.
+Uma aplicação web de karaokê moderna e intuitiva que oferece acesso imediato às músicas brasileiras mais populares, com reprodução instantânea e interface clean e sofisticada.
 
 **Experience Qualities**:
-1. **Elétrico** - Cada interação pulsa com energia cyberpunk através de acentos neon, elementos brilhantes e animações reativas
-2. **Imersivo** - O visualizador de microfone e player de tela cheia criam uma atmosfera de performance genuína
-3. **Recompensador** - Pontuação dinâmica, multiplicadores de combo e resultados comemorativos mantêm os performers engajados e motivados
+1. **Vibrante** - Cores vivas e gradientes suaves criam uma atmosfera energética e envolvente
+2. **Imersivo** - Player em tela cheia com visualizador de microfone proporciona experiência autêntica de karaokê
+3. **Intuitivo** - Interface limpa com navegação direta - clicar e cantar sem complicações
 
 **Complexity Level**: Light Application (multiple features with basic state)
-Esta é uma aplicação de página única rica em recursos com descoberta de músicas brasileiras, gerenciamento de filas avançado, controles de reprodução e elementos de gamificação, mas não requer roteamento complexo ou integração de backend.
+Aplicação single-page com catálogo de músicas curado, gerenciamento de filas, sistema de favoritos, playlists e player integrado. Foco em experiência direta e sem fricção.
 
 ## Essential Features
 
-### Descoberta e Busca de Músicas Brasileiras
-- **Funcionalidade**: Pesquisa em tempo real na biblioteca do YouTube de músicas de karaokê brasileiras usando a API do YouTube Data v3 com parâmetros `videoEmbeddable=true`, `regionCode=BR` e `relevanceLanguage=pt`, anexando automaticamente "karaoke letra português" às consultas para resultados otimizados, e validando a incorporabilidade de cada vídeo usando a API YouTube oEmbed antes de exibir
-- **Propósito**: Dá aos usuários acesso a conteúdo ilimitado de karaokê brasileiro do YouTube sem curadoria manual, filtrando proativamente vídeos que não podem ser incorporados para evitar o Erro 153
-- **Gatilho**: Usuário digita na barra de pesquisa e pressiona Enter ou clica no botão de busca
-- **Progressão**: Tela inicial → Digitar nome da música/artista no campo de busca → Pressionar Enter → Requisição à API do YouTube com filtro de incorporação e região BR → Cada resultado validado via API oEmbed → Apenas vídeos incorporáveis brasileiros exibidos em grid → Selecionar card da música → Tocar botão "Cantar Agora" → Música adicionada à fila com confirmação de toast
-- **Critérios de sucesso**: A busca retorna até 10 vídeos brasileiros incorporáveis do YouTube em 3-5 segundos, exibe resultados com miniaturas e informações do canal, lida graciosamente com erros de API com mensagens amigáveis, filtra automaticamente para conteúdo de karaokê brasileiro, bloqueia vídeos restritos no nível de pesquisa para evitar Erro 153
+### Catálogo de Músicas Populares
+- **Funcionalidade**: Biblioteca curada com 24 músicas populares brasileiras atuais (Barões da Pisadinha, Gusttavo Lima, Marília Mendonça, Anitta, etc.) organizadas em 8 categorias
+- **Propósito**: Acesso imediato aos maiores hits sem necessidade de busca - as músicas que todos querem cantar
+- **Gatilho**: Usuário abre o app
+- **Progressão**: App carrega → Exibe categorias (Piseiro, Sertanejo, Funk, Forró, Axé, Pagode, Pop, Pop Latino) → Scroll para explorar → Clica em "Cantar Agora" → Player inicia automaticamente
+- **Critérios de sucesso**: Carregamento instantâneo, cards com thumbnails claros, organização por categoria facilita descoberta, grid responsivo
 
-### Gerenciamento Avançado de Filas
-- **Funcionalidade**: Visualizar, reordenar (mover para cima/baixo), remover músicas individuais e limpar toda a fila de performance com controles intuitivos
-- **Propósito**: Dá aos usuários controle total sobre sua setlist e cria antecipação para as próximas performances
-- **Gatilho**: Tocar botão flutuante de fila (mostra badge com contagem) ou deslizar de baixo
-- **Progressão**: Qualquer tela → Tocar botão de fila → Drawer desliza para cima → Visualizar lista → Passar o mouse sobre música para revelar controles → Arrastar para reordenar ou tocar X para deletar → Tocar "Limpar" para remover todas → Tocar fora para fechar
-- **Critérios de sucesso**: Fila persiste entre sessões, exibe miniaturas e títulos das músicas, suporta até 50 músicas enfileiradas, reordenação funciona perfeitamente, remoção individual e limpeza total funcionam corretamente
+### Reprodução Instantânea
+- **Funcionalidade**: Ao clicar em qualquer música (home, favoritos ou fila), o player aparece automaticamente em tela cheia
+- **Propósito**: Experiência zero-friction - do clique ao canto em segundos
+- **Gatilho**: Click em "Cantar Agora" ou diretamente em uma música da fila
+- **Progressão**: Seleção → Player aparece → Vídeo carrega → Reprodução inicia → Pontuação começa
+- **Critérios de sucesso**: Transição suave (<300ms), vídeo inicia em <3s, sem passos intermediários, volta fácil para navegação
 
-### Adição Rápida à Fila
-- **Funcionalidade**: Adicionar músicas à fila diretamente dos cards de música sem navegar para a tela de performance
-- **Propósito**: Permite que usuários construam rapidamente uma setlist enquanto navegam pelo catálogo
-- **Gatilho**: Tocar menu de três pontos no card da música → Selecionar "Adicionar à Fila" OU tocar botão principal se já houver música tocando
-- **Progressão**: Navegar músicas → Tocar menu/botão → Música adicionada à fila → Toast de confirmação exibido
-- **Critérios de sucesso**: Adição à fila instantânea, confirmação visual clara, previne duplicatas, funciona de qualquer view
+### Gerenciamento de Fila Inteligente
+- **Funcionalidade**: Drawer flutuante mostra fila, permite reordenar e tocar qualquer música com um clique
+- **Propósito**: Controle total da setlist sem sair da experiência
+- **Gatilho**: Botão flutuante com badge mostrando quantidade de músicas
+- **Progressão**: Click no botão → Drawer abre → Visualiza lista → Click direto em música para tocar OU arrasta para reordenar → Click remove música → Click em "Limpar" remove todas
+- **Critérios de sucesso**: Fila persiste entre sessões, click toca imediatamente, reordenação intuitiva, visual limpo
 
-### Song Favoriting
-- **Functionality**: Mark favorite songs with a heart icon for quick access later
-- **Purpose**: Allows users to build a personal collection of their go-to karaoke songs
-- **Trigger**: User taps heart icon on any song card
-- **Progression**: Browse songs → Tap heart icon → Song added to favorites with toast → Access favorites via navigation bar → View all favorited songs in dedicated view
-- **Success criteria**: Favorites persist between sessions, heart icon toggles state immediately, favorites view shows all saved songs in grid layout
+### Sistema de Favoritos
+- **Funcionalidade**: Marcar músicas favoritas com ícone de coração, acessar view dedicada
+- **Propósito**: Coleção pessoal de músicas preferidas para acesso rápido
+- **Gatilho**: Click no ícone de coração em qualquer card
+- **Progressão**: Navega músicas → Click coração → Toast confirma → Acessa via navegação → View mostra todas favoritas → Click para tocar
+- **Critérios de sucesso**: Persistência entre sessões, toggle instantâneo, view dedicada com mesma experiência da home
 
-### Playlist Creation & Management
-- **Functionality**: Create custom playlists with names and descriptions, add songs to playlists, edit playlist details, delete playlists
-- **Purpose**: Enables users to curate themed setlists for different moods, events, or performance styles
-- **Trigger**: User navigates to Playlists view and taps "New Playlist" button
-- **Progression**: Playlists view → Tap "New Playlist" → Enter name and description → Create → Browse songs → Tap menu on song card → Select "Add to Playlist" → Choose playlist → Song added with confirmation
-- **Success criteria**: Playlists persist between sessions, support unlimited songs per playlist, allow editing names/descriptions, display song count and preview
+### Playlists Customizadas
+- **Funcionalidade**: Criar playlists com nome/descrição, adicionar músicas, carregar toda playlist na fila
+- **Propósito**: Curadoria temática para diferentes ocasiões
+- **Gatilho**: View de playlists → "Nova Playlist"
+- **Progressão**: Cria playlist → Navega músicas → Menu → "Adicionar à Playlist" → Escolhe playlist → View de playlists mostra contadores → "Carregar" adiciona todas à fila
+- **Critérios de sucesso**: Persistência, múltiplas playlists, edição/exclusão, preview visual
 
-### Playlist Loading
-- **Functionality**: Load entire playlists into the performance queue with one tap
-- **Purpose**: Quickly queue up a curated setlist without adding songs individually
-- **Trigger**: User taps "Load" button on a playlist card
-- **Progression**: Playlists view → Select playlist → Tap "Load" button → All playlist songs added to queue → Toast confirmation → Navigate to queue or start singing
-- **Success criteria**: All songs load to queue in order, duplicates are prevented, works with queues that already have songs
-
-### Queue Management
-- **Functionality**: View, reorder, and remove upcoming songs in the performance queue
-- **Purpose**: Gives users control over their setlist and builds anticipation for next performances
-- **Trigger**: Tap floating queue button (shows badge with count) or swipe up from bottom
-- **Progression**: Any screen → Tap queue button → Drawer slides up → View list → Drag to reorder or swipe to delete → Tap outside to close
-- **Success criteria**: Queue persists between sessions, displays song thumbnails and titles, supports up to 50 queued songs
-
-### Live Performance Stage
-- **Functionality**: Full-screen YouTube video playback with dual-layer compatibility verification (API parameter + oEmbed check), synchronized microphone input visualization, comprehensive error handling for Error 153 and other playback issues, and message event listeners for runtime errors
-- **Purpose**: Creates an immersive karaoke experience that makes users feel like they're on a real stage while proactively preventing embedding errors through multi-stage validation
-- **Trigger**: Song starts from queue or user selects "Sing Now"
-- **Progression**: Song selection → Stage loads with fade transition → First layer: API filtered for embeddable videos → Second layer: oEmbed API compatibility check runs → If compatible: Video iframe loads with error listeners → Mic visualizer activates → Score increases during performance → Song ends → Results modal appears | If incompatible at any stage: Detailed error screen displays with specific error message (Error 153, 404, network, etc.) → User can open in YouTube externally or skip to next song → Queue continues automatically
-- **Success criteria**: Two-stage compatibility check completes within 2-3 seconds, video loads within 3 seconds after passing checks, visualizer reacts to audio input with <50ms latency, error states provide clear explanations and actionable next steps, YouTube message events monitored for runtime errors (codes 150, 153, 101), no interface elements obstruct video content, seamless skip to next song on error
-
-### Microphone Visualizer
-- **Functionality**: Real-time audio waveform display that reacts to microphone input intensity
-- **Purpose**: Provides immediate visual feedback confirming the mic is active and responding to voice
-- **Trigger**: Automatically activates when stage view loads (after mic permission granted)
-- **Progression**: Stage loads → Request mic permission → Access granted → Visualizer appears at bottom → Bars pulse with voice input → Persists throughout song
-- **Success criteria**: Visualizer displays 32-64 frequency bars, updates at 60fps, color intensity matches input volume
-
-### Gamification System
-- **Functionality**: Dynamic scoring algorithm with combo multipliers and performance ratings
-- **Purpose**: Adds competitive fun and replay value by quantifying performance quality
-- **Trigger**: Score starts at 0 when song begins, increments based on playback progress and mock "pitch accuracy"
-- **Progression**: Song starts → Score counter appears → Points increase during singing → Combo multiplier builds → "Perfect!" animations appear → Song ends → Final score calculated → Star rating displayed (1-5) → Random compliment shown
-- **Success criteria**: Score visibly increases every 2-3 seconds, combo counter resets if no vocal input for 5 seconds, results screen includes shareable score
+### Player com Visualizador
+- **Funcionalidade**: Vídeo YouTube em tela cheia com visualizador de microfone sincronizado e sistema de pontuação
+- **Propósito**: Experiência imersiva de karaokê profissional
+- **Gatilho**: Qualquer música é selecionada
+- **Progressão**: Música selecionada → Stage carrega → Vídeo YouTube em iframe → Visualizador ativa → Barras reagem ao áudio → Pontuação aumenta → Fim da música → Modal de resultados
+- **Critérios de sucesso**: Carregamento rápido, tratamento de erros YouTube (Error 153), visualizador fluido, pontuação visível
 
 ## Edge Case Handling
 
-## Edge Case Handling
-
-- **Video Embedding Restricted (Error 153)**: Two-layer defense - YouTube API search filters for `videoEmbeddable=true`, then oEmbed API validates each result before display; if restricted video somehow loads, YouTube iframe message events detect Error 153/150/101 and show comprehensive error screen with video thumbnail, clear explanation, "Open in YouTube" button, and "Skip Song" option
-- **Video Not Found (404)**: Display "Video Not Found" error with skip option and queue continuation
-- **Playback Error During Video**: Monitor iframe message events for YouTube error codes, catch all errors and display retry/skip options with error-specific messaging
-- **Compatibility Check Network Failure**: If oEmbed check times out or fails due to network, show network error message with retry and skip options to prevent loading potentially incompatible videos
-- **oEmbed API Rate Limiting**: If validation API is rate-limited, fall back to showing YouTube API results with warning banner about potential playback issues
-- **No Microphone Permission**: Display persistent banner explaining visualizer requires mic access, with retry button
-- **Empty Favorites**: Show encouraging empty state with heart icon and instructions to favorite songs
-- **Empty Playlists**: Show empty state with music note icon and "Create Playlist" button
-- **Empty Playlist Content**: Disable "Load" button on playlists with no songs, show "0 songs" count
-- **Queue Empty**: Show encouraging empty state with "Pick your first song!" and featured recommendations
-- **Video Load Failure**: Catch YouTube errors and display retry button with option to skip to next song
-- **YouTube API Errors**: Display friendly error message "Unable to load songs right now" when API quota exceeded or network fails, maintain curated fallback content
-- **Empty Search Results**: Show "No karaoke videos found" with suggestion to try different keywords
-- **Mic Not Available**: Disable visualizer gracefully but allow playback to continue normally
-- **Network Interruption**: Show loading state if video buffering exceeds 5 seconds, allow user to cancel
-- **Multiple Rapid Clicks**: Debounce "Sing" button to prevent duplicate queue entries
-- **Duplicate Songs in Queue**: Prevent adding same song twice to queue
-- **Duplicate Songs in Playlist**: Prevent adding same song twice to a playlist
-- **Navigation During Playback**: Maintain playback state when switching between views
+- **Vídeo Restrito (Error 153)**: Modal com explicação clara, botão "Abrir no YouTube", botão "Pular Música"
+- **Vídeo Não Encontrado**: Erro com opção de pular
+- **Sem Permissão de Microfone**: Banner explicando que visualizador precisa de acesso, botão retry, player continua funcionando
+- **Favoritos Vazios**: Estado vazio com coração e instrução "Toque no coração em qualquer música"
+- **Playlists Vazias**: Estado vazio com ícone musical e botão "Criar Playlist"
+- **Fila Vazia**: Estado vazio com "Escolha sua primeira música!"
+- **Click Múltiplos Rápidos**: Debounce para prevenir duplicatas
+- **Duplicatas**: Sistema previne adicionar mesma música duas vezes
 
 ## Design Direction
 
-The design should evoke the electric energy of a late-night Tokyo karaoke bar crossed with Blade Runner's neon-soaked streets. Every element should glow, pulse, and react—creating a space that feels alive and celebratory. Users should feel like rock stars the moment they enter the app, with bold typography, high-contrast neon colors, and smooth theatrical transitions.
+Design moderno e sofisticado com fundo escuro rico, gradientes suaves e elementos que brilham sutilmente. Interface limpa mas vibrante, transmitindo profissionalismo e energia. Usuários devem se sentir em um ambiente premium com tipografia clara e transições suaves.
 
 ## Color Selection
 
-A cyberpunk-inspired palette with deep purples, electric pinks, and cyan accents against a rich dark background.
+Paleta escura moderna com violetas vibrantes e magentas elétricos.
 
-- **Primary Color**: Electric Cyan `oklch(0.75 0.15 210)` - Represents energy, technology, and the spotlight; used for primary CTAs and active states
+- **Primary Color**: Violeta Vibrante `oklch(0.70 0.20 280)` - Energia e criatividade, usado em CTAs e estados ativos
 - **Secondary Colors**: 
-  - Deep Purple Background `oklch(0.15 0.05 285)` - Creates depth and noir atmosphere
-  - Neon Magenta `oklch(0.65 0.25 330)` - Accent for queue badges, combos, and celebrations
-- **Accent Color**: Hot Pink `oklch(0.70 0.22 350)` - Attention-grabbing highlight for "Sing" buttons and score increases
+  - Cinza Escuro Azulado `oklch(0.22 0.04 260)` - Contraste e estrutura
+  - Fundo Profundo `oklch(0.12 0.02 260)` - Background imersivo
+- **Accent Color**: Magenta Elétrica `oklch(0.75 0.25 340)` - Badges de fila, destaque e celebrações
 - **Foreground/Background Pairings**: 
-  - Background (Deep Purple #1a0f2e): Cyan text (#00f5ff) - Ratio 8.2:1 ✓
-  - Background (Deep Purple #1a0f2e): White text (#ffffff) - Ratio 14.5:1 ✓
-  - Primary (Electric Cyan #00f5ff): Deep Purple text (#1a0f2e) - Ratio 8.2:1 ✓
-  - Accent (Hot Pink #ff1f8f): White text (#ffffff) - Ratio 5.1:1 ✓
+  - Background: Violeta/White text - Ratio >7:1 ✓
+  - Primary: White text - Ratio >4.5:1 ✓
+  - Accent: White text - Ratio >4.5:1 ✓
 
 ## Font Selection
 
-Typography should feel bold, futuristic, and slightly edgy—combining geometric sans-serifs with condensed letterforms that echo neon signage.
+Tipografia moderna e altamente legível com Inter como família principal.
 
 - **Typographic Hierarchy**:
-  - H1 (App Title "KARAOKE"): Orbitron Bold / 36px / wide letter-spacing (0.1em) / uppercase
-  - H2 (Category Headers): Orbitron SemiBold / 24px / normal spacing / uppercase
-  - H3 (Song Titles): Exo 2 SemiBold / 18px / tight leading
-  - Body (Descriptions, Lyrics): Exo 2 Regular / 16px / relaxed leading (1.6)
-  - UI Labels (Buttons, Tags): Exo 2 Medium / 14px / uppercase / slight spacing
+  - H1 (App Title): Inter Bold / 32px / letter-spacing 0.15em / uppercase
+  - H2 (Categories): Inter SemiBold / 22px
+  - H3 (Song Titles): Inter SemiBold / 16px
+  - Body: Inter Regular / 14px / line-height 1.6
+  - UI Labels: Inter Medium / 13px
 
 ## Animations
 
-Animations should feel snappy and theatrical—like stage lighting cues and laser shows. Every interaction should provide immediate feedback with glowing effects and smooth transitions. Microphone visualizer bars should bounce with elastic easing. Score increases should have a satisfying pop-in effect. Page transitions should use subtle fade-with-scale combinations (0.98 → 1.0 scale). Button hovers trigger a neon glow bloom effect using drop-shadow filters. The queue drawer slides up with momentum-based spring physics.
+Animações suaves e propositais: transições fade (300ms), hovers com scale sutil (1.02), badges pulse suave, drawer com ease-out, visualizador fluido reagindo ao áudio, botões com brilho em hover.
 
 ## Component Selection
 
 - **Components**: 
-  - `Card` - Song discovery tiles with hover glow effects and glassmorphism backdrop, playlist cards
-  - `Button` - Primary "Sing" CTAs with neon outline variant, ghost buttons for secondary actions, favorite/menu icon buttons
-  - `Input` - Search bar with glowing focus state, playlist name input
-  - `Textarea` - Playlist description input
-  - `Drawer` - Queue management sliding from bottom with backdrop blur
-  - `Dialog` - Results modal with celebration animations, playlist creation dialog
-  - `DropdownMenu` - Song card menu for adding to playlists and queue
-  - `Badge` - Queue count indicator with pulsing animation, playlist song count
-  - `ScrollArea` - Smooth scrolling for song lists and categories
-  - `Separator` - Subtle dividers with gradient glow effect
-  - Navigation bar - Fixed bottom navigation with Home, Favorites, Playlists, and Queue buttons
-- **Customizations**: 
-  - Custom visualizer component using canvas API with gradient fills
-  - Custom progress bar for song playback with neon trail effect
-  - Custom score counter with animated number transitions
+  - `Card` - Músicas e playlists com glass effect e hover glow
+  - `Button` - Primary violet, ghost secundário, icon buttons
+  - `Input` - Busca com focus glow
+  - `Drawer` - Fila deslizando de baixo
+  - `Dialog` - Resultados e criação de playlists
+  - `DropdownMenu` - Menu de músicas
+  - `Badge` - Contador de fila com pulse
+  - Navegação fixa inferior (Home, Favoritos, Playlists)
+  
 - **States**: 
-  - Buttons: Default with subtle glow → Hover adds bloom effect → Active compresses slightly with brightness boost → Disabled reduces opacity to 40%
-  - Inputs: Default with dim border → Focus adds cyan glow and border brightens → Filled shows success checkmark
-  - Cards: Default with dark glass background → Hover lifts with shadow and brightens → Active state adds cyan border pulse
+  - Buttons: Default → Hover (scale + glow) → Active → Disabled
+  - Cards: Default → Hover (lift + glow + play icon overlay)
+  - Queue items: Hover mostra overlay play + controles
+  
 - **Icon Selection**: 
-  - Microphone (mic icon) for recording/stage mode
-  - MagnifyingGlass for search
-  - Queue for song list
-  - Play/Pause for controls
-  - Plus for adding songs
-  - Star for ratings
-  - Lightning for combos
-  - X for removing items
-  - Heart for favorites (filled when favorited)
-  - DotsThreeVertical for song card menu
-  - House for home navigation
-  - Playlist for playlists navigation
-  - MusicNotes for empty playlist states
-  - PlayCircle for loading playlists
-  - Trash for deleting playlists
-  - PencilSimple for editing playlists
+  - Microphone (palco), MagnifyingGlass (busca), Queue (fila), Play (reprodução e overlay), Plus (adicionar), Heart (favoritos), House (home), Playlist, ArrowUp/Down (reordenar), X (remover), Trash (limpar)
+  
 - **Spacing**: 
-  - Card padding: p-6 (24px)
-  - Section gaps: gap-8 (32px) 
-  - Button padding: px-8 py-4 (32px/16px)
-  - Grid gaps: gap-4 (16px)
-  - Container max-width: max-w-6xl with px-4 mobile padding
+  - Card padding: p-4
+  - Section gaps: gap-6
+  - Button padding: px-6 py-3
+  - Grid gaps: gap-6
+  - Container: max-w-6xl px-4
+  
 - **Mobile**: 
-  - Stack all categories vertically on mobile (<768px)
-  - Search bar becomes fixed at top with backdrop blur on scroll
-  - Song cards use single column grid on mobile, 2 columns on tablet, 3+ on desktop
-  - Stage view uses 100vh height with video taking 60% and lyrics/visualizer 40%
-  - Queue drawer slides from bottom and can be swiped closed
-  - Bottom navigation bar fixed at bottom with 4 primary navigation items
-  - Navigation items show icons only on mobile, icons + text on larger screens
-  - Playlists and favorites views follow same responsive grid as home view
-  - Dialog and drawer components adapt to full-screen on mobile
+  - Single column <768px
+  - 2 columns tablet
+  - 3 columns desktop
+  - Fixed bottom navigation
+  - Full-screen player
+  - Responsive drawer
