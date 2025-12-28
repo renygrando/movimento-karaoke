@@ -1,6 +1,5 @@
 import { useKaraoke } from '@/contexts/KaraokeContext'
 import { SongCard } from './SongCard'
-import { songDatabase } from '@/lib/songDatabase'
 import { Heart } from '@phosphor-icons/react'
 
 interface FavoritesViewProps {
@@ -8,13 +7,14 @@ interface FavoritesViewProps {
 }
 
 export function FavoritesView({ onSongSelect }: FavoritesViewProps) {
-  const { favorites, setCurrentSong, setScore, setCombo } = useKaraoke()
+  const { favorites, setCurrentSong, setScore, setCombo, getSongById, addDiscoveredSong } = useKaraoke()
 
   const favoriteSongs = favorites
-    .map(id => songDatabase.find(s => s.id === id))
+    .map(id => getSongById(id))
     .filter(Boolean)
 
   const handleSingNow = (song: any) => {
+    addDiscoveredSong(song)
     setCurrentSong(song)
     setScore(0)
     setCombo(0)

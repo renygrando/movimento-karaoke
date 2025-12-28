@@ -47,6 +47,9 @@ interface KaraokeContextType {
   addSongToPlaylist: (playlistId: string, songId: string) => void
   removeSongFromPlaylist: (playlistId: string, songId: string) => void
   loadPlaylistToQueue: (playlistId: string) => void
+  discoveredSongs: Record<string, Song>
+  addDiscoveredSong: (song: Song) => void
+  getSongById: (songId: string) => Song | undefined
 }
 
 const KaraokeContext = createContext<KaraokeContextType | undefined>(undefined)
@@ -60,6 +63,20 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [favorites, setFavorites] = useKV<string[]>('karaoke-favorites', [])
   const [playlists, setPlaylists] = useKV<Playlist[]>('karaoke-playlists', [])
+  const [discoveredSongs, setDiscoveredSongs] = useKV<Record<string, Song>>('karaoke-discovered-songs', {})
+
+  const { songDatabase } = require('@/lib/songDatabase')
+  
+  const getSongById = useCallback((songId: string): Song | undefined => {
+    return (discoveredSongs || {})[songId] || songDatabase.find((s: Song) => s.id === songId)
+  }, [discoveredSongs, songDatabase])
+
+  const addDiscoveredSong = useCallback((song: Song) => {
+    setDiscoveredSongs((current) => ({
+      ...(current || {}),
+      [song.id]: song,
+    }))
+  }, [setDiscoveredSongs])
 
   const addToQueue = useCallback((song: Song) => {
     setQueue((currentQueue) => {
@@ -160,9 +177,8 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
     const playlist = (playlists || []).find(p => p.id === playlistId)
     if (!playlist) return
 
-    const { songDatabase } = require('@/lib/songDatabase')
     const playlistSongs = playlist.songIds
-      .map(id => songDatabase.find((s: Song) => s.id === id))
+      .map(id => getSongById(id))
       .filter(Boolean) as Song[]
 
     setQueue((currentQueue) => {
@@ -172,7 +188,7 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
       )
       return [...safeQueue, ...newSongs]
     })
-  }, [playlists, setQueue])
+  }, [playlists, setQueue, getSongById])
 
   return (
     <KaraokeContext.Provider
@@ -202,6 +218,9 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
         addSongToPlaylist,
         removeSongFromPlaylist,
         loadPlaylistToQueue,
+        discoveredSongs: discoveredSongs || {},
+        addDiscoveredSong,
+        getSongById,
       }}
     >
       {children}

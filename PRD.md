@@ -13,11 +13,11 @@ This is a feature-rich single-page application with song discovery, queue manage
 ## Essential Features
 
 ### Song Discovery & Search
-- **Functionality**: Search through a curated database of karaoke tracks filtered by genre, language, and popularity
-- **Purpose**: Helps users quickly find songs they want to perform without overwhelming choice paralysis
-- **Trigger**: User taps search bar or browses category cards on home screen
-- **Progression**: Home screen → Tap search input → Type query → View filtered results → Select song card → Tap "Sing" button → Song added to queue with toast confirmation
-- **Success criteria**: Search returns results within 200ms, categories display at least 8 songs each, "Sing" button provides immediate visual feedback
+- **Functionality**: Search YouTube's vast library of karaoke tracks in real-time using the YouTube Data API v3, automatically appending "karaoke letra" to queries for optimal results
+- **Purpose**: Gives users access to unlimited karaoke content from YouTube without manual curation
+- **Trigger**: User types in search bar and presses Enter or clicks search button
+- **Progression**: Home screen → Type song/artist name in search input → Press Enter → API request to YouTube → Results displayed in grid → Select song card → Tap "Sing" button → Song added to queue with toast confirmation
+- **Success criteria**: Search returns real YouTube videos within 2 seconds, displays 10 results with thumbnails and channel info, handles API errors gracefully with user-friendly messages, automatically filters for karaoke content
 
 ### Song Favoriting
 - **Functionality**: Mark favorite songs with a heart icon for quick access later
@@ -76,6 +76,8 @@ This is a feature-rich single-page application with song discovery, queue manage
 - **Empty Playlist Content**: Disable "Load" button on playlists with no songs, show "0 songs" count
 - **Queue Empty**: Show encouraging empty state with "Pick your first song!" and featured recommendations
 - **Video Load Failure**: Catch YouTube errors and display retry button with option to skip to next song
+- **YouTube API Errors**: Display friendly error message "Unable to load songs right now" when API quota exceeded or network fails, maintain curated fallback content
+- **Empty Search Results**: Show "No karaoke videos found" with suggestion to try different keywords
 - **Mic Not Available**: Disable visualizer gracefully but allow playback to continue normally
 - **Network Interruption**: Show loading state if video buffering exceeds 5 seconds, allow user to cancel
 - **Multiple Rapid Clicks**: Debounce "Sing" button to prevent duplicate queue entries

@@ -21,10 +21,11 @@ interface SongCardProps {
 }
 
 export function SongCard({ song, onSingNow }: SongCardProps) {
-  const { addToQueue, currentSong, toggleFavorite, isFavorite, playlists, addSongToPlaylist } = useKaraoke()
+  const { addToQueue, currentSong, toggleFavorite, isFavorite, playlists, addSongToPlaylist, addDiscoveredSong } = useKaraoke()
   const favorite = isFavorite(song.id)
 
   const handleSing = () => {
+    addDiscoveredSong(song)
     if (currentSong) {
       addToQueue(song)
       toast.success('Added to queue!', {
@@ -37,6 +38,7 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation()
+    addDiscoveredSong(song)
     toggleFavorite(song.id)
     toast.success(favorite ? 'Removed from favorites' : 'Added to favorites!', {
       description: song.title,
@@ -44,10 +46,19 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
   }
 
   const handleAddToPlaylist = (playlistId: string) => {
+    addDiscoveredSong(song)
     addSongToPlaylist(playlistId, song.id)
     const playlist = playlists.find(p => p.id === playlistId)
     toast.success('Added to playlist!', {
       description: playlist?.name,
+    })
+  }
+
+  const handleAddToQueue = () => {
+    addDiscoveredSong(song)
+    addToQueue(song)
+    toast.success('Added to queue!', {
+      description: `${song.title} by ${song.artist}`,
     })
   }
 
@@ -108,7 +119,7 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
                 </>
               )}
               <DropdownMenuItem
-                onClick={() => addToQueue(song)}
+                onClick={handleAddToQueue}
                 className="font-['Exo_2']"
               >
                 <Plus size={16} className="mr-2" />
@@ -133,9 +144,11 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
           <span className="text-xs font-['Exo_2'] text-muted-foreground uppercase tracking-wide">
             {song.language}
           </span>
-          <span className="text-xs font-['Exo_2'] text-muted-foreground">
-            {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
-          </span>
+          {song.duration > 0 && (
+            <span className="text-xs font-['Exo_2'] text-muted-foreground">
+              {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+            </span>
+          )}
         </div>
 
         <Button

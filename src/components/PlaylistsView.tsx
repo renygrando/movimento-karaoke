@@ -21,10 +21,9 @@ import {
   PencilSimple,
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { songDatabase } from '@/lib/songDatabase'
 
 export function PlaylistsView() {
-  const { playlists, createPlaylist, deletePlaylist, updatePlaylist, loadPlaylistToQueue } = useKaraoke()
+  const { playlists, createPlaylist, deletePlaylist, updatePlaylist, loadPlaylistToQueue, getSongById } = useKaraoke()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [newPlaylistName, setNewPlaylistName] = useState('')
   const [newPlaylistDescription, setNewPlaylistDescription] = useState('')
@@ -82,7 +81,7 @@ export function PlaylistsView() {
     const playlist = playlists.find(p => p.id === playlistId)
     if (!playlist) return []
     return playlist.songIds
-      .map(id => songDatabase.find(s => s.id === id))
+      .map(id => getSongById(id))
       .filter(Boolean)
   }
 
