@@ -1,11 +1,11 @@
 import { useEffect, useState, useRef } from 'react'
 import { useKaraoke } from '@/contexts/KaraokeContext'
-import ReactPlayer from 'react-player'
 import { Button } from '@/components/ui/button'
 import { MicrophoneVisualizer } from './MicrophoneVisualizer'
 import { ResultsModal } from './ResultsModal'
-import { ArrowLeft, Lightning } from '@phosphor-icons/react'
+import { ArrowLeft, Lightning, Warning, YoutubeLogo } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 
 interface StageViewProps {
   onBack: () => void
@@ -15,8 +15,10 @@ export function StageView({ onBack }: StageViewProps) {
   const { currentSong, score, setScore, combo, setCombo, playNext } = useKaraoke()
   const [showResults, setShowResults] = useState(false)
   const [isReady, setIsReady] = useState(false)
+  const [hasError, setHasError] = useState(false)
   const scoreIntervalRef = useRef<number | undefined>(undefined)
   const comboIntervalRef = useRef<number | undefined>(undefined)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
     if (!currentSong || !isReady) return
@@ -39,6 +41,13 @@ export function StageView({ onBack }: StageViewProps) {
     }
   }, [currentSong, isReady, combo, score, setScore, setCombo])
 
+  useEffect(() => {
+    if (currentSong) {
+      setIsReady(true)
+      setHasError(false)
+    }
+  }, [currentSong])
+
   const handleSongEnd = () => {
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current)
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current)
@@ -48,8 +57,20 @@ export function StageView({ onBack }: StageViewProps) {
   const handleResultsClose = () => {
     setShowResults(false)
     setIsReady(false)
+    setHasError(false)
     playNext()
     onBack()
+  }
+
+  const handlePlayerError = () => {
+    setHasError(true)
+    toast.error('Este vídeo não pode ser reproduzido aqui. Clique em "Abrir no YouTube" para assistir.')
+  }
+
+  const handleOpenInYoutube = () => {
+    if (currentSong) {
+      window.open(`https://www.youtube.com/watch?v=${currentSong.youtubeId}`, '_blank')
+    }
   }
 
   if (!currentSong) {
@@ -106,14 +127,44 @@ export function StageView({ onBack }: StageViewProps) {
       <div className="flex-1 flex flex-col pt-20 pb-4 px-4">
         <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col gap-4">
           <div className="flex-1 bg-black rounded-lg overflow-hidden shadow-[0_0_40px_rgba(0,245,255,0.3)] neon-border relative aspect-video">
-            <ReactPlayer
-              src={`https://www.youtube.com/watch?v=${currentSong.youtubeId}`}
-              playing
-              controls={false}
-              className="absolute inset-0"
-              onReady={() => setIsReady(true)}
-              onEnded={handleSongEnd}
-            />
+            {hasError ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-8 bg-gradient-to-br from-background via-secondary/50 to-background">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="flex items-center justify-center w-24 h-24 rounded-full bg-accent/20 border-2 border-accent"
+                >
+                  <Warning size={48} weight="fill" className="text-accent" />
+                </motion.div>
+                
+                <div className="text-center space-y-2">
+                  <h3 className="font-['Orbitron'] text-2xl font-bold text-foreground">
+                    Vídeo Protegido
+                  </h3>
+                  <p className="font-['Exo_2'] text-muted-foreground max-w-md">
+                    Este vídeo não permite reprodução externa. Abra no YouTube para cantar!
+                  </p>
+                </div>
+
+                <Button
+                  onClick={handleOpenInYoutube}
+                  className="gap-3 bg-[#FF0000] hover:bg-[#CC0000] text-white font-['Exo_2'] font-semibold px-6 py-6 text-lg"
+                >
+                  <YoutubeLogo size={28} weight="fill" />
+                  Abrir no YouTube
+                </Button>
+              </div>
+            ) : (
+              <iframe
+                ref={iframeRef}
+                src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&controls=1&modestbranding=1&rel=0&enablejsapi=1`}
+                title={currentSong.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+                onError={handlePlayerError}
+              />
+            )}
           </div>
 
           <div className="space-y-4">
