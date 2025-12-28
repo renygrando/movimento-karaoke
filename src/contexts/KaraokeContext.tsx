@@ -29,6 +29,7 @@ interface KaraokeContextType {
   addToQueue: (song: Song) => void
   removeFromQueue: (songId: string) => void
   clearQueue: () => void
+  reorderQueue: (newQueue: Song[]) => void
   playNext: () => void
   score: number
   setScore: (score: number) => void
@@ -95,6 +96,10 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
 
   const clearQueue = useCallback(() => {
     setQueue([])
+  }, [setQueue])
+
+  const reorderQueue = useCallback((newQueue: Song[]) => {
+    setQueue(newQueue)
   }, [setQueue])
 
   const playNext = useCallback(() => {
@@ -198,6 +203,7 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
         addToQueue,
         removeFromQueue,
         clearQueue,
+        reorderQueue,
         playNext,
         score,
         setScore,

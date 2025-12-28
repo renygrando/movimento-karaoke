@@ -28,8 +28,8 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
     addDiscoveredSong(song)
     if (currentSong) {
       addToQueue(song)
-      toast.success('Added to queue!', {
-        description: `${song.title} by ${song.artist}`,
+      toast.success('Adicionada à fila!', {
+        description: `${song.title} - ${song.artist}`,
       })
     } else {
       onSingNow?.()
@@ -40,7 +40,7 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
     e.stopPropagation()
     addDiscoveredSong(song)
     toggleFavorite(song.id)
-    toast.success(favorite ? 'Removed from favorites' : 'Added to favorites!', {
+    toast.success(favorite ? 'Removida dos favoritos' : 'Adicionada aos favoritos!', {
       description: song.title,
     })
   }
@@ -49,7 +49,7 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
     addDiscoveredSong(song)
     addSongToPlaylist(playlistId, song.id)
     const playlist = playlists.find(p => p.id === playlistId)
-    toast.success('Added to playlist!', {
+    toast.success('Adicionada à playlist!', {
       description: playlist?.name,
     })
   }
@@ -57,8 +57,8 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
   const handleAddToQueue = () => {
     addDiscoveredSong(song)
     addToQueue(song)
-    toast.success('Added to queue!', {
-      description: `${song.title} by ${song.artist}`,
+    toast.success('Adicionada à fila!', {
+      description: `${song.title} - ${song.artist}`,
     })
   }
 
@@ -101,7 +101,7 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
                 <>
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="font-['Exo_2']">
-                      Add to Playlist
+                      Adicionar à Playlist
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="glass-card">
                       {playlists.map((playlist) => (
@@ -123,7 +123,7 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
                 className="font-['Exo_2']"
               >
                 <Plus size={16} className="mr-2" />
-                Add to Queue
+                Adicionar à Fila
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -156,7 +156,7 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
           className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-['Exo_2'] font-medium uppercase tracking-wide hover:shadow-[0_0_15px_rgba(0,245,255,0.5)] transition-all"
         >
           {currentSong ? <Plus size={18} /> : <Microphone size={18} />}
-          {currentSong ? 'Add to Queue' : 'Sing Now'}
+          {currentSong ? 'Adicionar à Fila' : 'Cantar Agora'}
         </Button>
       </div>
     </Card>

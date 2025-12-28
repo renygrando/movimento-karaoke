@@ -1,23 +1,37 @@
 # Planning Guide
 
-A high-fidelity, interactive karaoke web application that transforms your device into a neon-lit stage, letting you perform your favorite songs with real-time visual feedback and gamified scoring.
+Uma aplicação web de karaokê de alta fidelidade e interativa que transforma seu dispositivo em um palco neon, permitindo que você se apresente com suas músicas brasileiras favoritas com feedback visual em tempo real e pontuação gamificada.
 
 **Experience Qualities**:
-1. **Electric** - Every interaction pulses with cyberpunk energy through neon accents, glowing elements, and reactive animations
-2. **Immersive** - The microphone visualizer and full-screen player create a genuine performance atmosphere
-3. **Rewarding** - Dynamic scoring, combo multipliers, and celebratory results keep performers engaged and motivated
+1. **Elétrico** - Cada interação pulsa com energia cyberpunk através de acentos neon, elementos brilhantes e animações reativas
+2. **Imersivo** - O visualizador de microfone e player de tela cheia criam uma atmosfera de performance genuína
+3. **Recompensador** - Pontuação dinâmica, multiplicadores de combo e resultados comemorativos mantêm os performers engajados e motivados
 
 **Complexity Level**: Light Application (multiple features with basic state)
-This is a feature-rich single-page application with song discovery, queue management, playback controls, and gamification elements, but doesn't require complex routing or backend integration.
+Esta é uma aplicação de página única rica em recursos com descoberta de músicas brasileiras, gerenciamento de filas avançado, controles de reprodução e elementos de gamificação, mas não requer roteamento complexo ou integração de backend.
 
 ## Essential Features
 
-### Song Discovery & Search
-- **Functionality**: Search YouTube's vast library of karaoke tracks in real-time using the YouTube Data API v3 with `videoEmbeddable=true` parameter, automatically appending "karaoke letra" to queries for optimal results, then validates each video's embeddability using YouTube oEmbed API before displaying
-- **Purpose**: Gives users access to unlimited karaoke content from YouTube without manual curation, while proactively filtering out videos that cannot be embedded to prevent Error 153
-- **Trigger**: User types in search bar and presses Enter or clicks search button
-- **Progression**: Home screen → Type song/artist name in search input → Press Enter → API request to YouTube with embeddable filter → Each result validated via oEmbed API → Only embeddable videos displayed in grid → Select song card → Tap "Sing" button → Song added to queue with toast confirmation
-- **Success criteria**: Search returns up to 10 embeddable YouTube videos within 3-5 seconds, displays results with thumbnails and channel info, handles API errors gracefully with user-friendly messages, automatically filters for karaoke content, blocks restricted videos at search level to prevent Error 153
+### Descoberta e Busca de Músicas Brasileiras
+- **Funcionalidade**: Pesquisa em tempo real na biblioteca do YouTube de músicas de karaokê brasileiras usando a API do YouTube Data v3 com parâmetros `videoEmbeddable=true`, `regionCode=BR` e `relevanceLanguage=pt`, anexando automaticamente "karaoke letra português" às consultas para resultados otimizados, e validando a incorporabilidade de cada vídeo usando a API YouTube oEmbed antes de exibir
+- **Propósito**: Dá aos usuários acesso a conteúdo ilimitado de karaokê brasileiro do YouTube sem curadoria manual, filtrando proativamente vídeos que não podem ser incorporados para evitar o Erro 153
+- **Gatilho**: Usuário digita na barra de pesquisa e pressiona Enter ou clica no botão de busca
+- **Progressão**: Tela inicial → Digitar nome da música/artista no campo de busca → Pressionar Enter → Requisição à API do YouTube com filtro de incorporação e região BR → Cada resultado validado via API oEmbed → Apenas vídeos incorporáveis brasileiros exibidos em grid → Selecionar card da música → Tocar botão "Cantar Agora" → Música adicionada à fila com confirmação de toast
+- **Critérios de sucesso**: A busca retorna até 10 vídeos brasileiros incorporáveis do YouTube em 3-5 segundos, exibe resultados com miniaturas e informações do canal, lida graciosamente com erros de API com mensagens amigáveis, filtra automaticamente para conteúdo de karaokê brasileiro, bloqueia vídeos restritos no nível de pesquisa para evitar Erro 153
+
+### Gerenciamento Avançado de Filas
+- **Funcionalidade**: Visualizar, reordenar (mover para cima/baixo), remover músicas individuais e limpar toda a fila de performance com controles intuitivos
+- **Propósito**: Dá aos usuários controle total sobre sua setlist e cria antecipação para as próximas performances
+- **Gatilho**: Tocar botão flutuante de fila (mostra badge com contagem) ou deslizar de baixo
+- **Progressão**: Qualquer tela → Tocar botão de fila → Drawer desliza para cima → Visualizar lista → Passar o mouse sobre música para revelar controles → Arrastar para reordenar ou tocar X para deletar → Tocar "Limpar" para remover todas → Tocar fora para fechar
+- **Critérios de sucesso**: Fila persiste entre sessões, exibe miniaturas e títulos das músicas, suporta até 50 músicas enfileiradas, reordenação funciona perfeitamente, remoção individual e limpeza total funcionam corretamente
+
+### Adição Rápida à Fila
+- **Funcionalidade**: Adicionar músicas à fila diretamente dos cards de música sem navegar para a tela de performance
+- **Propósito**: Permite que usuários construam rapidamente uma setlist enquanto navegam pelo catálogo
+- **Gatilho**: Tocar menu de três pontos no card da música → Selecionar "Adicionar à Fila" OU tocar botão principal se já houver música tocando
+- **Progressão**: Navegar músicas → Tocar menu/botão → Música adicionada à fila → Toast de confirmação exibido
+- **Critérios de sucesso**: Adição à fila instantânea, confirmação visual clara, previne duplicatas, funciona de qualquer view
 
 ### Song Favoriting
 - **Functionality**: Mark favorite songs with a heart icon for quick access later

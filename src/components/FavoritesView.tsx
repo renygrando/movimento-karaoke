@@ -27,7 +27,7 @@ export function FavoritesView({ onSongSelect }: FavoritesViewProps) {
         <div className="max-w-6xl mx-auto px-4 py-6">
           <h1 className="font-['Orbitron'] text-3xl md:text-4xl font-black uppercase tracking-[0.2em] glow-text flex items-center gap-3 justify-center">
             <Heart size={32} weight="fill" className="text-accent" />
-            Favorites
+            Favoritos
           </h1>
         </div>
       </div>
@@ -37,16 +37,16 @@ export function FavoritesView({ onSongSelect }: FavoritesViewProps) {
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
             <Heart size={64} className="text-muted-foreground opacity-50" />
             <h2 className="font-['Orbitron'] text-2xl font-bold text-muted-foreground">
-              No Favorites Yet
+              Nenhum Favorito Ainda
             </h2>
             <p className="font-['Exo_2'] text-muted-foreground text-center max-w-md">
-              Tap the heart icon on any song to add it to your favorites
+              Toque no ícone de coração em qualquer música para adicioná-la aos seus favoritos
             </p>
           </div>
         ) : (
           <div>
             <p className="font-['Exo_2'] text-muted-foreground mb-6">
-              {favoriteSongs.length} {favoriteSongs.length === 1 ? 'song' : 'songs'}
+              {favoriteSongs.length} {favoriteSongs.length === 1 ? 'música' : 'músicas'}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {favoriteSongs.map((song) => song && (

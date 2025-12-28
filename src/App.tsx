@@ -44,7 +44,7 @@ function AppContent() {
                 }`}
               >
                 <House size={20} />
-                <span className="hidden sm:inline">Home</span>
+                <span className="hidden sm:inline">Início</span>
               </Button>
               
               <Button
@@ -58,7 +58,7 @@ function AppContent() {
                 }`}
               >
                 <Heart size={20} />
-                <span className="hidden sm:inline">Favorites</span>
+                <span className="hidden sm:inline">Favoritos</span>
               </Button>
               
               <Button

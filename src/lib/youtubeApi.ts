@@ -48,7 +48,7 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
     return []
   }
 
-  const searchQuery = `${query} karaoke letra`
+  const searchQuery = `${query} karaoke letra português`
   
   try {
     const url = new URL(YOUTUBE_API_BASE)
@@ -56,6 +56,8 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
     url.searchParams.append('q', searchQuery)
     url.searchParams.append('type', 'video')
     url.searchParams.append('videoEmbeddable', 'true')
+    url.searchParams.append('regionCode', 'BR')
+    url.searchParams.append('relevanceLanguage', 'pt')
     url.searchParams.append('maxResults', '15')
     url.searchParams.append('key', YOUTUBE_API_KEY)
 
@@ -88,8 +90,8 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
                      item.snippet.thumbnails.medium?.url || 
                      item.snippet.thumbnails.default?.url,
           duration: 0,
-          category: 'YouTube Search',
-          language: detectLanguage(item.snippet.title),
+          category: 'Busca YouTube',
+          language: 'Portuguese',
         })
       }
     }

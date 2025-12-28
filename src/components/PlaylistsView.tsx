@@ -33,12 +33,12 @@ export function PlaylistsView() {
 
   const handleCreatePlaylist = () => {
     if (!newPlaylistName.trim()) {
-      toast.error('Please enter a playlist name')
+      toast.error('Por favor, insira um nome para a playlist')
       return
     }
 
     createPlaylist(newPlaylistName, newPlaylistDescription)
-    toast.success('Playlist created!', {
+    toast.success('Playlist criada!', {
       description: newPlaylistName,
     })
     setNewPlaylistName('')
@@ -48,14 +48,14 @@ export function PlaylistsView() {
 
   const handleDeletePlaylist = (playlistId: string, playlistName: string) => {
     deletePlaylist(playlistId)
-    toast.success('Playlist deleted', {
+    toast.success('Playlist deletada', {
       description: playlistName,
     })
   }
 
   const handleLoadPlaylist = (playlistId: string, playlistName: string) => {
     loadPlaylistToQueue(playlistId)
-    toast.success('Playlist loaded to queue!', {
+    toast.success('Playlist carregada na fila!', {
       description: playlistName,
     })
   }
@@ -73,7 +73,7 @@ export function PlaylistsView() {
       name: editName,
       description: editDescription,
     })
-    toast.success('Playlist updated!')
+    toast.success('Playlist atualizada!')
     setEditingPlaylist(null)
   }
 
@@ -91,7 +91,7 @@ export function PlaylistsView() {
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <h1 className="font-['Orbitron'] text-3xl md:text-4xl font-black uppercase tracking-[0.2em] glow-text">
-              My Playlists
+              Minhas Playlists
             </h1>
             
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -100,23 +100,23 @@ export function PlaylistsView() {
                   className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-['Exo_2'] font-medium uppercase tracking-wide hover:shadow-[0_0_15px_rgba(0,245,255,0.5)] transition-all"
                 >
                   <Plus size={18} />
-                  New Playlist
+                  Nova Playlist
                 </Button>
               </DialogTrigger>
               <DialogContent className="glass-card border-border/50">
                 <DialogHeader>
                   <DialogTitle className="font-['Orbitron'] text-2xl uppercase tracking-wide">
-                    Create Playlist
+                    Criar Playlist
                   </DialogTitle>
                   <DialogDescription className="font-['Exo_2'] text-muted-foreground">
-                    Build your perfect setlist
+                    Construa sua setlist perfeita
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
                     <Input
                       id="playlist-name"
-                      placeholder="Playlist name"
+                      placeholder="Nome da playlist"
                       value={newPlaylistName}
                       onChange={(e) => setNewPlaylistName(e.target.value)}
                       className="font-['Exo_2'] bg-card/50 border-border/50"
@@ -125,7 +125,7 @@ export function PlaylistsView() {
                   <div className="space-y-2">
                     <Textarea
                       id="playlist-description"
-                      placeholder="Description (optional)"
+                      placeholder="Descrição (opcional)"
                       value={newPlaylistDescription}
                       onChange={(e) => setNewPlaylistDescription(e.target.value)}
                       className="font-['Exo_2'] bg-card/50 border-border/50 min-h-[100px]"
@@ -138,13 +138,13 @@ export function PlaylistsView() {
                     onClick={() => setIsCreateDialogOpen(false)}
                     className="font-['Exo_2']"
                   >
-                    Cancel
+                    Cancelar
                   </Button>
                   <Button
                     onClick={handleCreatePlaylist}
                     className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-['Exo_2']"
                   >
-                    Create
+                    Criar
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -158,17 +158,17 @@ export function PlaylistsView() {
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
             <MusicNotes size={64} className="text-muted-foreground opacity-50" />
             <h2 className="font-['Orbitron'] text-2xl font-bold text-muted-foreground">
-              No Playlists Yet
+              Nenhuma Playlist Ainda
             </h2>
             <p className="font-['Exo_2'] text-muted-foreground text-center max-w-md">
-              Create your first playlist to organize your favorite songs and build the perfect setlist
+              Crie sua primeira playlist para organizar suas músicas favoritas e construir a setlist perfeita
             </p>
             <Button
               onClick={() => setIsCreateDialogOpen(true)}
               className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-['Exo_2'] font-medium uppercase tracking-wide hover:shadow-[0_0_15px_rgba(0,245,255,0.5)] transition-all mt-4"
             >
               <Plus size={18} />
-              Create Playlist
+              Criar Playlist
             </Button>
           </div>
         ) : (
@@ -201,7 +201,7 @@ export function PlaylistsView() {
                             onClick={handleUpdatePlaylist}
                             className="flex-1 font-['Exo_2'] bg-primary hover:bg-primary/90"
                           >
-                            Save
+                            Salvar
                           </Button>
                           <Button
                             size="sm"
@@ -209,7 +209,7 @@ export function PlaylistsView() {
                             onClick={() => setEditingPlaylist(null)}
                             className="flex-1 font-['Exo_2']"
                           >
-                            Cancel
+                            Cancelar
                           </Button>
                         </div>
                       </div>
@@ -229,7 +229,7 @@ export function PlaylistsView() {
                         <div className="flex items-center gap-2 text-sm font-['Exo_2'] text-muted-foreground">
                           <MusicNotes size={16} />
                           <span>
-                            {songs.length} {songs.length === 1 ? 'song' : 'songs'}
+                            {songs.length} {songs.length === 1 ? 'música' : 'músicas'}
                           </span>
                         </div>
 
@@ -245,7 +245,7 @@ export function PlaylistsView() {
                             ))}
                             {songs.length > 5 && (
                               <div className="text-xs font-['Exo_2'] text-muted-foreground">
-                                + {songs.length - 5} more
+                                + {songs.length - 5} mais
                               </div>
                             )}
                           </div>
@@ -259,7 +259,7 @@ export function PlaylistsView() {
                             className="flex-1 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-['Exo_2'] font-medium uppercase tracking-wide hover:shadow-[0_0_15px_rgba(0,245,255,0.5)] transition-all"
                           >
                             <PlayCircle size={16} />
-                            Load
+                            Carregar
                           </Button>
                           <Button
                             size="sm"
