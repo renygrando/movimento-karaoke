@@ -3,7 +3,7 @@ import { useKaraoke } from '@/contexts/KaraokeContext'
 import { Button } from '@/components/ui/button'
 import { MicrophoneVisualizer } from './MicrophoneVisualizer'
 import { ResultsModal } from './ResultsModal'
-import { ArrowLeft, Lightning, Warning, YoutubeLogo } from '@phosphor-icons/react'
+import { ArrowLeft, Lightning, Warning, YoutubeLogo, CircleNotch } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 
@@ -16,9 +16,57 @@ export function StageView({ onBack }: StageViewProps) {
   const [showResults, setShowResults] = useState(false)
   const [isReady, setIsReady] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const [isCheckingCompatibility, setIsCheckingCompatibility] = useState(true)
+  const [compatibilityError, setCompatibilityError] = useState<string | null>(null)
   const scoreIntervalRef = useRef<number | undefined>(undefined)
   const comboIntervalRef = useRef<number | undefined>(undefined)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  useEffect(() => {
+    const checkVideoCompatibility = async () => {
+      if (!currentSong) return
+
+      setIsCheckingCompatibility(true)
+      setCompatibilityError(null)
+      setHasError(false)
+      setIsReady(false)
+
+      try {
+        const response = await fetch(
+          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${currentSong.youtubeId}&format=json`
+        )
+
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            setCompatibilityError('restricted')
+            setHasError(true)
+          } else {
+            setCompatibilityError('not_found')
+            setHasError(true)
+          }
+          setIsCheckingCompatibility(false)
+          return
+        }
+
+        const data = await response.json()
+        
+        if (data && data.title) {
+          setIsReady(true)
+          setIsCheckingCompatibility(false)
+        } else {
+          setCompatibilityError('unknown')
+          setHasError(true)
+          setIsCheckingCompatibility(false)
+        }
+      } catch (error) {
+        console.error('Video compatibility check failed:', error)
+        setIsReady(true)
+        setIsCheckingCompatibility(false)
+      }
+    }
+
+    checkVideoCompatibility()
+  }, [currentSong])
 
   useEffect(() => {
     if (!currentSong || !isReady) return
@@ -41,13 +89,6 @@ export function StageView({ onBack }: StageViewProps) {
     }
   }, [currentSong, isReady, combo, score, setScore, setCombo])
 
-  useEffect(() => {
-    if (currentSong) {
-      setIsReady(true)
-      setHasError(false)
-    }
-  }, [currentSong])
-
   const handleSongEnd = () => {
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current)
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current)
@@ -63,13 +104,53 @@ export function StageView({ onBack }: StageViewProps) {
   }
 
   const handlePlayerError = () => {
-    setHasError(true)
-    toast.error('Este vídeo não pode ser reproduzido aqui. Clique em "Abrir no YouTube" para assistir.')
+    if (!hasError) {
+      setHasError(true)
+      setCompatibilityError('playback_error')
+      toast.error('Este vídeo não pode ser reproduzido aqui. Clique em "Abrir no YouTube" para assistir.')
+    }
   }
 
   const handleOpenInYoutube = () => {
     if (currentSong) {
       window.open(`https://www.youtube.com/watch?v=${currentSong.youtubeId}`, '_blank')
+    }
+  }
+
+  const handleSkipSong = () => {
+    if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current)
+    if (comboIntervalRef.current) clearInterval(comboIntervalRef.current)
+    setIsReady(false)
+    setHasError(false)
+    setCompatibilityError(null)
+    playNext()
+    if (!currentSong) {
+      onBack()
+    }
+  }
+
+  const getErrorMessage = () => {
+    switch (compatibilityError) {
+      case 'restricted':
+        return {
+          title: 'Vídeo Protegido',
+          description: 'Este vídeo tem restrições de incorporação e não pode ser reproduzido aqui. Abra no YouTube para assistir!'
+        }
+      case 'not_found':
+        return {
+          title: 'Vídeo Não Encontrado',
+          description: 'Este vídeo não está mais disponível ou foi removido.'
+        }
+      case 'playback_error':
+        return {
+          title: 'Erro de Reprodução',
+          description: 'Ocorreu um erro ao tentar reproduzir este vídeo. Tente abrir no YouTube.'
+        }
+      default:
+        return {
+          title: 'Não Foi Possível Carregar',
+          description: 'Este vídeo não pode ser carregado no momento. Tente novamente ou abra no YouTube.'
+        }
     }
   }
 
@@ -127,7 +208,26 @@ export function StageView({ onBack }: StageViewProps) {
       <div className="flex-1 flex flex-col pt-20 pb-4 px-4">
         <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col gap-4">
           <div className="flex-1 bg-black rounded-lg overflow-hidden shadow-[0_0_40px_rgba(0,245,255,0.3)] neon-border relative aspect-video">
-            {hasError ? (
+            {isCheckingCompatibility ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-8 bg-gradient-to-br from-background via-secondary/50 to-background">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="flex items-center justify-center w-24 h-24 rounded-full bg-primary/20 border-2 border-primary"
+                >
+                  <CircleNotch size={48} weight="bold" className="text-primary" />
+                </motion.div>
+                
+                <div className="text-center space-y-2">
+                  <h3 className="font-['Orbitron'] text-2xl font-bold text-foreground">
+                    Verificando Compatibilidade
+                  </h3>
+                  <p className="font-['Exo_2'] text-muted-foreground max-w-md">
+                    Checando se o vídeo pode ser reproduzido...
+                  </p>
+                </div>
+              </div>
+            ) : hasError ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-8 bg-gradient-to-br from-background via-secondary/50 to-background">
                 <motion.div
                   initial={{ scale: 0 }}
@@ -139,20 +239,30 @@ export function StageView({ onBack }: StageViewProps) {
                 
                 <div className="text-center space-y-2">
                   <h3 className="font-['Orbitron'] text-2xl font-bold text-foreground">
-                    Vídeo Protegido
+                    {getErrorMessage().title}
                   </h3>
                   <p className="font-['Exo_2'] text-muted-foreground max-w-md">
-                    Este vídeo não permite reprodução externa. Abra no YouTube para cantar!
+                    {getErrorMessage().description}
                   </p>
                 </div>
 
-                <Button
-                  onClick={handleOpenInYoutube}
-                  className="gap-3 bg-[#FF0000] hover:bg-[#CC0000] text-white font-['Exo_2'] font-semibold px-6 py-6 text-lg"
-                >
-                  <YoutubeLogo size={28} weight="fill" />
-                  Abrir no YouTube
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={handleOpenInYoutube}
+                    className="gap-3 bg-[#FF0000] hover:bg-[#CC0000] text-white font-['Exo_2'] font-semibold px-6 py-6 text-lg"
+                  >
+                    <YoutubeLogo size={28} weight="fill" />
+                    Abrir no YouTube
+                  </Button>
+
+                  <Button
+                    onClick={handleSkipSong}
+                    variant="outline"
+                    className="gap-3 font-['Exo_2'] font-semibold px-6 py-6 text-lg border-primary/50 hover:bg-primary/10"
+                  >
+                    Pular Música
+                  </Button>
+                </div>
               </div>
             ) : (
               <iframe

@@ -48,11 +48,11 @@ This is a feature-rich single-page application with song discovery, queue manage
 - **Success criteria**: Queue persists between sessions, displays song thumbnails and titles, supports up to 50 queued songs
 
 ### Live Performance Stage
-- **Functionality**: Full-screen YouTube video playback with synchronized microphone input visualization
-- **Purpose**: Creates an immersive karaoke experience that makes users feel like they're on a real stage
+- **Functionality**: Full-screen YouTube video playback with pre-playback compatibility check, synchronized microphone input visualization, and graceful error handling for restricted videos
+- **Purpose**: Creates an immersive karaoke experience that makes users feel like they're on a real stage while handling embedding restrictions proactively
 - **Trigger**: Song starts from queue or user selects "Sing Now"
-- **Progression**: Song selection → Stage loads with fade transition → Video plays automatically → Mic visualizer activates → Lyrics area displays below video → Score increases during performance → Song ends → Results modal appears
-- **Success criteria**: Video loads within 3 seconds, visualizer reacts to audio input with <50ms latency, no interface elements obstruct video content
+- **Progression**: Song selection → Stage loads with fade transition → Compatibility check runs using YouTube oEmbed API → If compatible: Video plays automatically → Mic visualizer activates → Lyrics area displays below video → Score increases during performance → Song ends → Results modal appears | If incompatible: Error screen displays → User can open in YouTube or skip to next song
+- **Success criteria**: Compatibility check completes within 2 seconds, video loads within 3 seconds after passing check, visualizer reacts to audio input with <50ms latency, error states provide clear next actions, no interface elements obstruct video content
 
 ### Microphone Visualizer
 - **Functionality**: Real-time audio waveform display that reacts to microphone input intensity
@@ -70,6 +70,10 @@ This is a feature-rich single-page application with song discovery, queue manage
 
 ## Edge Case Handling
 
+- **Video Embedding Restricted (Error 153)**: Before loading iframe, check video compatibility using YouTube oEmbed API; if restricted, show error screen with "Open in YouTube" button and "Skip Song" option
+- **Video Not Found (404)**: Display "Video Not Found" error with skip option
+- **Playback Error During Video**: Catch iframe errors and display retry/skip options
+- **Compatibility Check Network Failure**: If oEmbed check fails due to network, optimistically load video and handle errors if they occur
 - **No Microphone Permission**: Display persistent banner explaining visualizer requires mic access, with retry button
 - **Empty Favorites**: Show encouraging empty state with heart icon and instructions to favorite songs
 - **Empty Playlists**: Show empty state with music note icon and "Create Playlist" button
