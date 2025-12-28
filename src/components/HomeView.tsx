@@ -67,6 +67,9 @@ export function HomeView() {
     setCurrentSong(song)
     setScore(0)
     setCombo(0)
+    toast.success('Tocando agora!', {
+      description: `${song.title} - ${song.artist}`,
+    })
   }
 
   useEffect(() => {

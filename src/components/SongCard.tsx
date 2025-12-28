@@ -2,7 +2,7 @@ import { Song } from '@/contexts/KaraokeContext'
 import { useKaraoke } from '@/contexts/KaraokeContext'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Microphone, Plus, Heart, DotsThreeVertical } from '@phosphor-icons/react'
+import { Microphone, Heart, DotsThreeVertical } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -21,19 +21,12 @@ interface SongCardProps {
 }
 
 export function SongCard({ song, onSingNow }: SongCardProps) {
-  const { addToQueue, currentSong, toggleFavorite, isFavorite, playlists, addSongToPlaylist, addDiscoveredSong } = useKaraoke()
+  const { toggleFavorite, isFavorite, playlists, addSongToPlaylist, addDiscoveredSong } = useKaraoke()
   const favorite = isFavorite(song.id)
 
   const handleSing = () => {
     addDiscoveredSong(song)
-    if (currentSong) {
-      addToQueue(song)
-      toast.success('Adicionada à fila!', {
-        description: `${song.title} - ${song.artist}`,
-      })
-    } else {
-      onSingNow?.()
-    }
+    onSingNow?.()
   }
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
@@ -51,14 +44,6 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
     const playlist = playlists.find(p => p.id === playlistId)
     toast.success('Adicionada à playlist!', {
       description: playlist?.name,
-    })
-  }
-
-  const handleAddToQueue = () => {
-    addDiscoveredSong(song)
-    addToQueue(song)
-    toast.success('Adicionada à fila!', {
-      description: `${song.title} - ${song.artist}`,
     })
   }
 
@@ -86,47 +71,37 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
             />
           </Button>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm hover:bg-background/80 hover:scale-110 transition-all"
-              >
-                <DotsThreeVertical size={18} className="text-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="glass-card">
-              {playlists.length > 0 && (
-                <>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="font-['Exo_2']">
-                      Adicionar à Playlist
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="glass-card">
-                      {playlists.map((playlist) => (
-                        <DropdownMenuItem
-                          key={playlist.id}
-                          onClick={() => handleAddToPlaylist(playlist.id)}
-                          className="font-['Exo_2']"
-                        >
-                          {playlist.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              <DropdownMenuItem
-                onClick={handleAddToQueue}
-                className="font-['Exo_2']"
-              >
-                <Plus size={16} className="mr-2" />
-                Adicionar à Fila
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {playlists.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm hover:bg-background/80 hover:scale-110 transition-all"
+                >
+                  <DotsThreeVertical size={18} className="text-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="glass-card">
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="font-['Exo_2']">
+                    Adicionar à Playlist
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="glass-card">
+                    {playlists.map((playlist) => (
+                      <DropdownMenuItem
+                        key={playlist.id}
+                        onClick={() => handleAddToPlaylist(playlist.id)}
+                        className="font-['Exo_2']"
+                      >
+                        {playlist.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
       
@@ -155,8 +130,8 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
           onClick={handleSing}
           className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-['Exo_2'] font-medium uppercase tracking-wide hover:shadow-[0_0_15px_rgba(0,245,255,0.5)] transition-all"
         >
-          {currentSong ? <Plus size={18} /> : <Microphone size={18} />}
-          {currentSong ? 'Adicionar à Fila' : 'Cantar Agora'}
+          <Microphone size={18} />
+          Cantar Agora
         </Button>
       </div>
     </Card>
