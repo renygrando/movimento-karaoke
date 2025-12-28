@@ -298,9 +298,10 @@ export function StageView({ onBack }: StageViewProps) {
             ) : (
               <iframe
                 ref={iframeRef}
-                src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&controls=1&modestbranding=1&rel=0&enablejsapi=1`}
+                src={`https://www.youtube-nocookie.com/embed/${currentSong.youtubeId}?autoplay=1&controls=1&modestbranding=1&rel=0&enablejsapi=1`}
                 title={currentSong.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
                 className="w-full h-full"
                 onError={handlePlayerError}
