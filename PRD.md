@@ -1,6 +1,6 @@
 # Planning Guide
 
-Uma aplicação web de karaokê focada em busca e reprodução de vídeos de karaokê do YouTube. Interface minimalista onde o player aparece sempre que uma música é selecionada, permitindo busca ilimitada e experiência fluida.
+Uma aplicação web de karaokê focada em busca e reprodução de vídeos de karaokê do YouTube. Interface minimalista onde o player aparece sempre que uma música é selecionada, permitindo busca ilimitada e experiência fluida. **Progressive Web App (PWA) instalável** para acesso rápido e uso offline.
 
 **Experience Qualities**:
 1. **Simplificado** - Interface limpa focada em busca, resultados e player integrado
@@ -8,9 +8,16 @@ Uma aplicação web de karaokê focada em busca e reprodução de vídeos de kar
 3. **Direto** - Busca, clica e canta - sem navegação complexa ou menus extras
 
 **Complexity Level**: Micro Tool (single-purpose application)
-Aplicação single-page focada exclusivamente em busca e reprodução de karaokê do YouTube. Player permanece sempre visível na página principal após seleção.
+Aplicação single-page focada exclusivamente em busca e reprodução de karaokê do YouTube. Player permanece sempre visível na página principal após seleção. Disponível como PWA instalável para acesso rápido como aplicativo nativo.
 
 ## Essential Features
+
+### Progressive Web App (PWA)
+- **Funcionalidade**: App instalável que funciona como aplicativo nativo no dispositivo
+- **Propósito**: Acesso rápido através de ícone na home screen, experiência offline, notificações de instalação
+- **Gatilho**: Navegador detecta PWA e oferece instalação, ou usuário clica em prompt de instalação
+- **Progressão**: Visita site → Prompt de instalação aparece → Usuário aceita → App instalado na home screen → Abre como app standalone → Service Worker cacheia assets → Funciona offline
+- **Critérios de sucesso**: Manifest.json configurado, Service Worker registrado, ícones em múltiplos tamanhos, prompt de instalação elegante, cache inteligente de assets
 
 ### Busca de Músicas do YouTube
 - **Funcionalidade**: Barra de busca que pesquisa vídeos de karaokê no YouTube
@@ -42,6 +49,8 @@ Aplicação single-page focada exclusivamente em busca e reprodução de karaok�
 
 ## Edge Case Handling
 
+- **PWA Não Instalado**: Prompt elegante e não invasivo no canto inferior direito oferecendo instalação
+- **Service Worker Falha**: App continua funcionando normalmente, apenas sem cache offline
 - **Vídeo Restrito (Error 153)**: Modal com explicação clara, botão "Abrir no YouTube", botão "Fechar Player"
 - **Vídeo Não Encontrado**: Erro com opção de fechar player e selecionar outra música
 - **Sem Permissão de Microfone**: Visualizador continua com animação mock, sem bloquear experiência
@@ -52,6 +61,7 @@ Aplicação single-page focada exclusivamente em busca e reprodução de karaok�
 - **Erro de Rede**: Mensagem clara de erro com opção de tentar novamente
 - **Música Termina Naturalmente**: Modal de congratulações com pontuação final, estrelas e mensagem motivacional
 - **Troca de Música Durante Reprodução**: Score atual é resetado, novo score começa a acumular
+- **Modo Offline (PWA)**: Assets principais cacheados, busca YouTube desabilitada com mensagem clara
 
 ## Design Direction
 
@@ -84,7 +94,7 @@ Tipografia moderna e altamente legível com Inter como família principal.
 
 ## Animations
 
-Animações suaves e propositais: transições fade (300ms), hovers com scale sutil (1.02), player com verificação de compatibilidade animada, visualizador fluido reagindo ao áudio, modal de resultados com estrelas animadas entrando em rotação, efeito glow na pontuação final, mensagens com pulse para celebração.
+Animações suaves e propositais: transições fade (300ms), hovers com scale sutil (1.02), player com verificação de compatibilidade animada, visualizador fluido reagindo ao áudio, modal de resultados com estrelas animadas entrando em rotação, efeito glow na pontuação final, mensagens com pulse para celebração. Prompt PWA entra com spring animation do bottom.
 
 ## Component Selection
 
@@ -94,15 +104,17 @@ Animações suaves e propositais: transições fade (300ms), hovers com scale su
   - `Input` - Busca com ícone e focus glow
   - `Dialog` - Modal de resultados ao fim da música
   - Glass cards para informações de música e visualizador
+  - Glass card para prompt de instalação PWA
   - Navegação simplificada - apenas título e busca no topo
   
 - **States**: 
   - Buttons: Default → Hover (scale + glow) → Active → Disabled
   - Cards: Default → Hover (lift + glow + play icon overlay)
   - Player: Loading → Ready → Error states com visual claro
+  - PWA Prompt: Hidden → Visible → Dismissed → Accepted
   
 - **Icon Selection**: 
-  - MagnifyingGlass (busca), Play (cards), Lightning (combo), Warning (erros), YoutubeLogo (fallback), CircleNotch (loading)
+  - MagnifyingGlass (busca), Play (cards), Lightning (combo), Warning (erros), YoutubeLogo (fallback), CircleNotch (loading), DownloadSimple (instalar PWA), X (fechar)
   
 - **Spacing**: 
   - Card padding: p-4
@@ -117,3 +129,4 @@ Animações suaves e propositais: transições fade (300ms), hovers com scale su
   - 3 columns desktop
   - Player aspect-video responsivo
   - Busca stack em mobile
+  - PWA prompt full-width em mobile, max-w-md desktop
