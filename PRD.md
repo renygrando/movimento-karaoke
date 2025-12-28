@@ -19,6 +19,27 @@ This is a feature-rich single-page application with song discovery, queue manage
 - **Progression**: Home screen → Tap search input → Type query → View filtered results → Select song card → Tap "Sing" button → Song added to queue with toast confirmation
 - **Success criteria**: Search returns results within 200ms, categories display at least 8 songs each, "Sing" button provides immediate visual feedback
 
+### Song Favoriting
+- **Functionality**: Mark favorite songs with a heart icon for quick access later
+- **Purpose**: Allows users to build a personal collection of their go-to karaoke songs
+- **Trigger**: User taps heart icon on any song card
+- **Progression**: Browse songs → Tap heart icon → Song added to favorites with toast → Access favorites via navigation bar → View all favorited songs in dedicated view
+- **Success criteria**: Favorites persist between sessions, heart icon toggles state immediately, favorites view shows all saved songs in grid layout
+
+### Playlist Creation & Management
+- **Functionality**: Create custom playlists with names and descriptions, add songs to playlists, edit playlist details, delete playlists
+- **Purpose**: Enables users to curate themed setlists for different moods, events, or performance styles
+- **Trigger**: User navigates to Playlists view and taps "New Playlist" button
+- **Progression**: Playlists view → Tap "New Playlist" → Enter name and description → Create → Browse songs → Tap menu on song card → Select "Add to Playlist" → Choose playlist → Song added with confirmation
+- **Success criteria**: Playlists persist between sessions, support unlimited songs per playlist, allow editing names/descriptions, display song count and preview
+
+### Playlist Loading
+- **Functionality**: Load entire playlists into the performance queue with one tap
+- **Purpose**: Quickly queue up a curated setlist without adding songs individually
+- **Trigger**: User taps "Load" button on a playlist card
+- **Progression**: Playlists view → Select playlist → Tap "Load" button → All playlist songs added to queue → Toast confirmation → Navigate to queue or start singing
+- **Success criteria**: All songs load to queue in order, duplicates are prevented, works with queues that already have songs
+
 ### Queue Management
 - **Functionality**: View, reorder, and remove upcoming songs in the performance queue
 - **Purpose**: Gives users control over their setlist and builds anticipation for next performances
@@ -50,11 +71,17 @@ This is a feature-rich single-page application with song discovery, queue manage
 ## Edge Case Handling
 
 - **No Microphone Permission**: Display persistent banner explaining visualizer requires mic access, with retry button
+- **Empty Favorites**: Show encouraging empty state with heart icon and instructions to favorite songs
+- **Empty Playlists**: Show empty state with music note icon and "Create Playlist" button
+- **Empty Playlist Content**: Disable "Load" button on playlists with no songs, show "0 songs" count
 - **Queue Empty**: Show encouraging empty state with "Pick your first song!" and featured recommendations
 - **Video Load Failure**: Catch YouTube errors and display retry button with option to skip to next song
 - **Mic Not Available**: Disable visualizer gracefully but allow playback to continue normally
 - **Network Interruption**: Show loading state if video buffering exceeds 5 seconds, allow user to cancel
 - **Multiple Rapid Clicks**: Debounce "Sing" button to prevent duplicate queue entries
+- **Duplicate Songs in Queue**: Prevent adding same song twice to queue
+- **Duplicate Songs in Playlist**: Prevent adding same song twice to a playlist
+- **Navigation During Playback**: Maintain playback state when switching between views
 
 ## Design Direction
 
@@ -93,14 +120,17 @@ Animations should feel snappy and theatrical—like stage lighting cues and lase
 ## Component Selection
 
 - **Components**: 
-  - `Card` - Song discovery tiles with hover glow effects and glassmorphism backdrop
-  - `Button` - Primary "Sing" CTAs with neon outline variant, ghost buttons for secondary actions
-  - `Input` - Search bar with glowing focus state and clear button
+  - `Card` - Song discovery tiles with hover glow effects and glassmorphism backdrop, playlist cards
+  - `Button` - Primary "Sing" CTAs with neon outline variant, ghost buttons for secondary actions, favorite/menu icon buttons
+  - `Input` - Search bar with glowing focus state, playlist name input
+  - `Textarea` - Playlist description input
   - `Drawer` - Queue management sliding from bottom with backdrop blur
-  - `Dialog` - Results modal with celebration animations
-  - `Badge` - Queue count indicator with pulsing animation
+  - `Dialog` - Results modal with celebration animations, playlist creation dialog
+  - `DropdownMenu` - Song card menu for adding to playlists and queue
+  - `Badge` - Queue count indicator with pulsing animation, playlist song count
   - `ScrollArea` - Smooth scrolling for song lists and categories
   - `Separator` - Subtle dividers with gradient glow effect
+  - Navigation bar - Fixed bottom navigation with Home, Favorites, Playlists, and Queue buttons
 - **Customizations**: 
   - Custom visualizer component using canvas API with gradient fills
   - Custom progress bar for song playback with neon trail effect
@@ -118,6 +148,14 @@ Animations should feel snappy and theatrical—like stage lighting cues and lase
   - Star for ratings
   - Lightning for combos
   - X for removing items
+  - Heart for favorites (filled when favorited)
+  - DotsThreeVertical for song card menu
+  - House for home navigation
+  - Playlist for playlists navigation
+  - MusicNotes for empty playlist states
+  - PlayCircle for loading playlists
+  - Trash for deleting playlists
+  - PencilSimple for editing playlists
 - **Spacing**: 
   - Card padding: p-6 (24px)
   - Section gaps: gap-8 (32px) 
@@ -130,4 +168,7 @@ Animations should feel snappy and theatrical—like stage lighting cues and lase
   - Song cards use single column grid on mobile, 2 columns on tablet, 3+ on desktop
   - Stage view uses 100vh height with video taking 60% and lyrics/visualizer 40%
   - Queue drawer slides from bottom and can be swiped closed
-  - Floating action buttons positioned bottom-right with adequate touch targets (56px)
+  - Bottom navigation bar fixed at bottom with 4 primary navigation items
+  - Navigation items show icons only on mobile, icons + text on larger screens
+  - Playlists and favorites views follow same responsive grid as home view
+  - Dialog and drawer components adapt to full-screen on mobile

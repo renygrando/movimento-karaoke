@@ -12,6 +12,15 @@ export interface Song {
   language: string
 }
 
+export interface Playlist {
+  id: string
+  name: string
+  description: string
+  songIds: string[]
+  createdAt: number
+  updatedAt: number
+}
+
 interface KaraokeContextType {
   currentSong: Song | null
   setCurrentSong: (song: Song | null) => void
@@ -28,6 +37,16 @@ interface KaraokeContextType {
   setIsMicActive: (active: boolean) => void
   isPlaying: boolean
   setIsPlaying: (playing: boolean) => void
+  favorites: string[]
+  toggleFavorite: (songId: string) => void
+  isFavorite: (songId: string) => boolean
+  playlists: Playlist[]
+  createPlaylist: (name: string, description: string) => void
+  deletePlaylist: (playlistId: string) => void
+  updatePlaylist: (playlistId: string, updates: Partial<Playlist>) => void
+  addSongToPlaylist: (playlistId: string, songId: string) => void
+  removeSongFromPlaylist: (playlistId: string, songId: string) => void
+  loadPlaylistToQueue: (playlistId: string) => void
 }
 
 const KaraokeContext = createContext<KaraokeContextType | undefined>(undefined)
@@ -39,6 +58,8 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
   const [combo, setCombo] = useState(0)
   const [isMicActive, setIsMicActive] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [favorites, setFavorites] = useKV<string[]>('karaoke-favorites', [])
+  const [playlists, setPlaylists] = useKV<Playlist[]>('karaoke-playlists', [])
 
   const addToQueue = useCallback((song: Song) => {
     setQueue((currentQueue) => {
@@ -75,6 +96,84 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
     })
   }, [setQueue])
 
+  const toggleFavorite = useCallback((songId: string) => {
+    setFavorites((currentFavorites) => {
+      const safeFavorites = currentFavorites || []
+      if (safeFavorites.includes(songId)) {
+        return safeFavorites.filter(id => id !== songId)
+      }
+      return [...safeFavorites, songId]
+    })
+  }, [setFavorites])
+
+  const isFavorite = useCallback((songId: string) => {
+    return (favorites || []).includes(songId)
+  }, [favorites])
+
+  const createPlaylist = useCallback((name: string, description: string) => {
+    const newPlaylist: Playlist = {
+      id: `playlist-${Date.now()}`,
+      name,
+      description,
+      songIds: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }
+    setPlaylists((current) => [...(current || []), newPlaylist])
+  }, [setPlaylists])
+
+  const deletePlaylist = useCallback((playlistId: string) => {
+    setPlaylists((current) => (current || []).filter(p => p.id !== playlistId))
+  }, [setPlaylists])
+
+  const updatePlaylist = useCallback((playlistId: string, updates: Partial<Playlist>) => {
+    setPlaylists((current) => 
+      (current || []).map(p => 
+        p.id === playlistId 
+          ? { ...p, ...updates, updatedAt: Date.now() }
+          : p
+      )
+    )
+  }, [setPlaylists])
+
+  const addSongToPlaylist = useCallback((playlistId: string, songId: string) => {
+    setPlaylists((current) =>
+      (current || []).map(p =>
+        p.id === playlistId && !p.songIds.includes(songId)
+          ? { ...p, songIds: [...p.songIds, songId], updatedAt: Date.now() }
+          : p
+      )
+    )
+  }, [setPlaylists])
+
+  const removeSongFromPlaylist = useCallback((playlistId: string, songId: string) => {
+    setPlaylists((current) =>
+      (current || []).map(p =>
+        p.id === playlistId
+          ? { ...p, songIds: p.songIds.filter(id => id !== songId), updatedAt: Date.now() }
+          : p
+      )
+    )
+  }, [setPlaylists])
+
+  const loadPlaylistToQueue = useCallback((playlistId: string) => {
+    const playlist = (playlists || []).find(p => p.id === playlistId)
+    if (!playlist) return
+
+    const { songDatabase } = require('@/lib/songDatabase')
+    const playlistSongs = playlist.songIds
+      .map(id => songDatabase.find((s: Song) => s.id === id))
+      .filter(Boolean) as Song[]
+
+    setQueue((currentQueue) => {
+      const safeQueue = currentQueue || []
+      const newSongs = playlistSongs.filter(
+        song => !safeQueue.some(s => s.id === song.id)
+      )
+      return [...safeQueue, ...newSongs]
+    })
+  }, [playlists, setQueue])
+
   return (
     <KaraokeContext.Provider
       value={{
@@ -93,6 +192,16 @@ export function KaraokeProvider({ children }: { children: ReactNode }) {
         setIsMicActive,
         isPlaying,
         setIsPlaying,
+        favorites: favorites || [],
+        toggleFavorite,
+        isFavorite,
+        playlists: playlists || [],
+        createPlaylist,
+        deletePlaylist,
+        updatePlaylist,
+        addSongToPlaylist,
+        removeSongFromPlaylist,
+        loadPlaylistToQueue,
       }}
     >
       {children}

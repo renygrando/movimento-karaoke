@@ -2,8 +2,18 @@ import { Song } from '@/contexts/KaraokeContext'
 import { useKaraoke } from '@/contexts/KaraokeContext'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Microphone, Plus } from '@phosphor-icons/react'
+import { Microphone, Plus, Heart, DotsThreeVertical } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface SongCardProps {
   song: Song
@@ -11,7 +21,8 @@ interface SongCardProps {
 }
 
 export function SongCard({ song, onSingNow }: SongCardProps) {
-  const { addToQueue, currentSong } = useKaraoke()
+  const { addToQueue, currentSong, toggleFavorite, isFavorite, playlists, addSongToPlaylist } = useKaraoke()
+  const favorite = isFavorite(song.id)
 
   const handleSing = () => {
     if (currentSong) {
@@ -24,6 +35,22 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
     }
   }
 
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    toggleFavorite(song.id)
+    toast.success(favorite ? 'Removed from favorites' : 'Added to favorites!', {
+      description: song.title,
+    })
+  }
+
+  const handleAddToPlaylist = (playlistId: string) => {
+    addSongToPlaylist(playlistId, song.id)
+    const playlist = playlists.find(p => p.id === playlistId)
+    toast.success('Added to playlist!', {
+      description: playlist?.name,
+    })
+  }
+
   return (
     <Card className="group relative overflow-hidden glass-card hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,245,255,0.3)]">
       <div className="aspect-video relative overflow-hidden rounded-t-lg">
@@ -33,6 +60,63 @@ export function SongCard({ song, onSingNow }: SongCardProps) {
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent opacity-80" />
+        
+        <div className="absolute top-2 right-2 flex gap-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleToggleFavorite}
+            className="h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm hover:bg-background/80 hover:scale-110 transition-all"
+          >
+            <Heart
+              size={18}
+              weight={favorite ? 'fill' : 'regular'}
+              className={favorite ? 'text-accent' : 'text-foreground'}
+            />
+          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm hover:bg-background/80 hover:scale-110 transition-all"
+              >
+                <DotsThreeVertical size={18} className="text-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="glass-card">
+              {playlists.length > 0 && (
+                <>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="font-['Exo_2']">
+                      Add to Playlist
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="glass-card">
+                      {playlists.map((playlist) => (
+                        <DropdownMenuItem
+                          key={playlist.id}
+                          onClick={() => handleAddToPlaylist(playlist.id)}
+                          className="font-['Exo_2']"
+                        >
+                          {playlist.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem
+                onClick={() => addToQueue(song)}
+                className="font-['Exo_2']"
+              >
+                <Plus size={16} className="mr-2" />
+                Add to Queue
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       
       <div className="p-4 space-y-3">
