@@ -13,11 +13,11 @@ This is a feature-rich single-page application with song discovery, queue manage
 ## Essential Features
 
 ### Song Discovery & Search
-- **Functionality**: Search YouTube's vast library of karaoke tracks in real-time using the YouTube Data API v3, automatically appending "karaoke letra" to queries for optimal results
-- **Purpose**: Gives users access to unlimited karaoke content from YouTube without manual curation
+- **Functionality**: Search YouTube's vast library of karaoke tracks in real-time using the YouTube Data API v3 with `videoEmbeddable=true` parameter, automatically appending "karaoke letra" to queries for optimal results, then validates each video's embeddability using YouTube oEmbed API before displaying
+- **Purpose**: Gives users access to unlimited karaoke content from YouTube without manual curation, while proactively filtering out videos that cannot be embedded to prevent Error 153
 - **Trigger**: User types in search bar and presses Enter or clicks search button
-- **Progression**: Home screen → Type song/artist name in search input → Press Enter → API request to YouTube → Results displayed in grid → Select song card → Tap "Sing" button → Song added to queue with toast confirmation
-- **Success criteria**: Search returns real YouTube videos within 2 seconds, displays 10 results with thumbnails and channel info, handles API errors gracefully with user-friendly messages, automatically filters for karaoke content
+- **Progression**: Home screen → Type song/artist name in search input → Press Enter → API request to YouTube with embeddable filter → Each result validated via oEmbed API → Only embeddable videos displayed in grid → Select song card → Tap "Sing" button → Song added to queue with toast confirmation
+- **Success criteria**: Search returns up to 10 embeddable YouTube videos within 3-5 seconds, displays results with thumbnails and channel info, handles API errors gracefully with user-friendly messages, automatically filters for karaoke content, blocks restricted videos at search level to prevent Error 153
 
 ### Song Favoriting
 - **Functionality**: Mark favorite songs with a heart icon for quick access later
@@ -48,11 +48,11 @@ This is a feature-rich single-page application with song discovery, queue manage
 - **Success criteria**: Queue persists between sessions, displays song thumbnails and titles, supports up to 50 queued songs
 
 ### Live Performance Stage
-- **Functionality**: Full-screen YouTube video playback with pre-playback compatibility check, synchronized microphone input visualization, and graceful error handling for restricted videos
-- **Purpose**: Creates an immersive karaoke experience that makes users feel like they're on a real stage while handling embedding restrictions proactively
+- **Functionality**: Full-screen YouTube video playback with dual-layer compatibility verification (API parameter + oEmbed check), synchronized microphone input visualization, comprehensive error handling for Error 153 and other playback issues, and message event listeners for runtime errors
+- **Purpose**: Creates an immersive karaoke experience that makes users feel like they're on a real stage while proactively preventing embedding errors through multi-stage validation
 - **Trigger**: Song starts from queue or user selects "Sing Now"
-- **Progression**: Song selection → Stage loads with fade transition → Compatibility check runs using YouTube oEmbed API → If compatible: Video plays automatically → Mic visualizer activates → Lyrics area displays below video → Score increases during performance → Song ends → Results modal appears | If incompatible: Error screen displays → User can open in YouTube or skip to next song
-- **Success criteria**: Compatibility check completes within 2 seconds, video loads within 3 seconds after passing check, visualizer reacts to audio input with <50ms latency, error states provide clear next actions, no interface elements obstruct video content
+- **Progression**: Song selection → Stage loads with fade transition → First layer: API filtered for embeddable videos → Second layer: oEmbed API compatibility check runs → If compatible: Video iframe loads with error listeners → Mic visualizer activates → Score increases during performance → Song ends → Results modal appears | If incompatible at any stage: Detailed error screen displays with specific error message (Error 153, 404, network, etc.) → User can open in YouTube externally or skip to next song → Queue continues automatically
+- **Success criteria**: Two-stage compatibility check completes within 2-3 seconds, video loads within 3 seconds after passing checks, visualizer reacts to audio input with <50ms latency, error states provide clear explanations and actionable next steps, YouTube message events monitored for runtime errors (codes 150, 153, 101), no interface elements obstruct video content, seamless skip to next song on error
 
 ### Microphone Visualizer
 - **Functionality**: Real-time audio waveform display that reacts to microphone input intensity
@@ -70,10 +70,13 @@ This is a feature-rich single-page application with song discovery, queue manage
 
 ## Edge Case Handling
 
-- **Video Embedding Restricted (Error 153)**: Before loading iframe, check video compatibility using YouTube oEmbed API; if restricted, show error screen with "Open in YouTube" button and "Skip Song" option
-- **Video Not Found (404)**: Display "Video Not Found" error with skip option
-- **Playback Error During Video**: Catch iframe errors and display retry/skip options
-- **Compatibility Check Network Failure**: If oEmbed check fails due to network, optimistically load video and handle errors if they occur
+## Edge Case Handling
+
+- **Video Embedding Restricted (Error 153)**: Two-layer defense - YouTube API search filters for `videoEmbeddable=true`, then oEmbed API validates each result before display; if restricted video somehow loads, YouTube iframe message events detect Error 153/150/101 and show comprehensive error screen with video thumbnail, clear explanation, "Open in YouTube" button, and "Skip Song" option
+- **Video Not Found (404)**: Display "Video Not Found" error with skip option and queue continuation
+- **Playback Error During Video**: Monitor iframe message events for YouTube error codes, catch all errors and display retry/skip options with error-specific messaging
+- **Compatibility Check Network Failure**: If oEmbed check times out or fails due to network, show network error message with retry and skip options to prevent loading potentially incompatible videos
+- **oEmbed API Rate Limiting**: If validation API is rate-limited, fall back to showing YouTube API results with warning banner about potential playback issues
 - **No Microphone Permission**: Display persistent banner explaining visualizer requires mic access, with retry button
 - **Empty Favorites**: Show encouraging empty state with heart icon and instructions to favorite songs
 - **Empty Playlists**: Show empty state with music note icon and "Create Playlist" button

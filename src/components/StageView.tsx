@@ -33,13 +33,17 @@ export function StageView({ onBack }: StageViewProps) {
 
       try {
         const response = await fetch(
-          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${currentSong.youtubeId}&format=json`
+          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${currentSong.youtubeId}&format=json`,
+          { method: 'GET' }
         )
 
         if (!response.ok) {
-          if (response.status === 401 || response.status === 403) {
+          if (response.status === 401 || response.status === 403 || response.status === 404) {
             setCompatibilityError('restricted')
             setHasError(true)
+            toast.error('Vídeo com restrições de reprodução', {
+              description: 'Este vídeo não pode ser incorporado. Use o botão para abrir no YouTube.',
+            })
           } else {
             setCompatibilityError('not_found')
             setHasError(true)
@@ -60,12 +64,34 @@ export function StageView({ onBack }: StageViewProps) {
         }
       } catch (error) {
         console.error('Video compatibility check failed:', error)
-        setIsReady(true)
+        setCompatibilityError('network_error')
+        setHasError(true)
         setIsCheckingCompatibility(false)
       }
     }
 
     checkVideoCompatibility()
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin === 'https://www.youtube.com') {
+        try {
+          const data = JSON.parse(event.data)
+          if (data.event === 'infoDelivery' && data.info?.errorCode) {
+            console.error('YouTube Player Error Code:', data.info.errorCode)
+            if (data.info.errorCode === 150 || data.info.errorCode === 153 || data.info.errorCode === 101) {
+              handlePlayerError()
+            }
+          }
+        } catch (e) {
+        }
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
   }, [currentSong])
 
   useEffect(() => {
@@ -133,18 +159,23 @@ export function StageView({ onBack }: StageViewProps) {
     switch (compatibilityError) {
       case 'restricted':
         return {
-          title: 'Vídeo Protegido',
-          description: 'Este vídeo tem restrições de incorporação e não pode ser reproduzido aqui. Abra no YouTube para assistir!'
+          title: 'Vídeo Protegido (Erro 153)',
+          description: 'Este vídeo possui restrições de incorporação definidas pelo proprietário e não pode ser reproduzido aqui. Clique no botão abaixo para assistir diretamente no YouTube!'
         }
       case 'not_found':
         return {
           title: 'Vídeo Não Encontrado',
-          description: 'Este vídeo não está mais disponível ou foi removido.'
+          description: 'Este vídeo não está mais disponível ou foi removido pelo proprietário.'
         }
       case 'playback_error':
         return {
           title: 'Erro de Reprodução',
-          description: 'Ocorreu um erro ao tentar reproduzir este vídeo. Tente abrir no YouTube.'
+          description: 'Ocorreu um erro ao tentar reproduzir este vídeo. Tente abrir no YouTube para uma melhor experiência.'
+        }
+      case 'network_error':
+        return {
+          title: 'Erro de Conexão',
+          description: 'Não foi possível verificar a compatibilidade do vídeo. Verifique sua conexão ou tente abrir no YouTube.'
         }
       default:
         return {
