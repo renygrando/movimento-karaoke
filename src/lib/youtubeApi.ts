@@ -59,7 +59,7 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
     url.searchParams.append("videoEmbeddable", "true");
     url.searchParams.append("regionCode", "BR");
     url.searchParams.append("relevanceLanguage", "pt");
-    url.searchParams.append("maxResults", "50"); // Aumentado para mais resultados
+    url.searchParams.append("maxResults", "50"); // Busca 50 para filtrar depois
     url.searchParams.append("key", YOUTUBE_API_KEY);
 
     const response = await fetch(url.toString());
@@ -77,9 +77,9 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
     const songs: Song[] = [];
 
     for (const item of data.items) {
-      if (songs.length >= 20) break; // Aumentado de 10 para 20 resultados
+      if (songs.length >= 30) break; // Retorna até 30 resultados
 
-      // Filtros básicos apenas
+      // Validar se é um vídeo de karaoke
       if (!isValidKaraokeVideo(item.snippet.title, item.snippet.channelTitle)) {
         continue;
       }
@@ -112,11 +112,21 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
 
 function isValidKaraokeVideo(title: string, channelTitle: string): boolean {
   const titleLower = title.toLowerCase();
+  const channelLower = channelTitle.toLowerCase();
 
   // Palavras-chave que indicam que é karaoke
-  const karaokeIndicators = ["karaoke", "letra", "lyrics"];
+  const karaokeIndicators = [
+    "karaoke",
+    "letra",
+    "lyrics",
+    "music video",
+    "official",
+    "cover",
+    "sing along",
+    "backing track",
+  ];
 
-  // Filtros MÍNIMOS - apenas exclui conteúdos claramente não-karaoke
+  // Filtros para EXCLUIR - conteúdos que definitivamente NÃO são karaoke
   const excludeIndicators = [
     "making of",
     "documentário",
@@ -126,18 +136,25 @@ function isValidKaraokeVideo(title: string, channelTitle: string): boolean {
     "tutorial",
     "how to",
     "como fazer",
+    "reação",
+    "reaction",
+    "análise",
+    "analysis",
+    "crítica",
+    "review",
   ];
 
   // Deve ter pelo menos um indicador de karaoke
-  const hasKaraokeIndicator = karaokeIndicators.some((indicator) =>
-    titleLower.includes(indicator)
+  const hasKaraokeIndicator = karaokeIndicators.some(
+    (indicator) =>
+      titleLower.includes(indicator) || channelLower.includes(indicator)
   );
 
   if (!hasKaraokeIndicator) {
     return false;
   }
 
-  // Apenas exclui conteúdos muito específicos que definitivamente não são karaoke
+  // Exclui conteúdos específicos
   const hasExcludeIndicator = excludeIndicators.some((indicator) =>
     titleLower.includes(indicator)
   );
