@@ -48,8 +48,8 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
     return [];
   }
 
-  // Busca especificamente por karaoke com letra
-  const searchQuery = `${query} karaoke letra`;
+  // Busca mais aberta - apenas adiciona "karaoke" ao termo
+  const searchQuery = `${query} karaoke`;
 
   try {
     const url = new URL(YOUTUBE_API_BASE);
@@ -59,7 +59,7 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
     url.searchParams.append("videoEmbeddable", "true");
     url.searchParams.append("regionCode", "BR");
     url.searchParams.append("relevanceLanguage", "pt");
-    url.searchParams.append("maxResults", "30"); // Mais resultados para filtrar
+    url.searchParams.append("maxResults", "50"); // Aumentado para mais resultados
     url.searchParams.append("key", YOUTUBE_API_KEY);
 
     const response = await fetch(url.toString());
@@ -77,9 +77,9 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
     const songs: Song[] = [];
 
     for (const item of data.items) {
-      if (songs.length >= 10) break;
+      if (songs.length >= 20) break; // Aumentado de 10 para 20 resultados
 
-      // Filtros para garantir que é um karaoke legítimo
+      // Filtros básicos apenas
       if (!isValidKaraokeVideo(item.snippet.title, item.snippet.channelTitle)) {
         continue;
       }
@@ -112,28 +112,20 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
 
 function isValidKaraokeVideo(title: string, channelTitle: string): boolean {
   const titleLower = title.toLowerCase();
-  const channelLower = channelTitle.toLowerCase();
 
-  // Palavras-chave que indicam que é um karaoke válido
-  const karaokeIndicators = ["karaoke", "letra", "lyrics", "com letra"];
+  // Palavras-chave que indicam que é karaoke
+  const karaokeIndicators = ["karaoke", "letra", "lyrics"];
 
-  // Palavras que indicam que NÃO é um karaoke (é um videoclipe, trailer, etc)
+  // Filtros MÍNIMOS - apenas exclui conteúdos claramente não-karaoke
   const excludeIndicators = [
-    "videoclipe",
-    "video clip",
-    "oficial",
-    "official",
-    "trailer",
-    "teaser",
     "making of",
     "documentário",
     "documentary",
     "entrevista",
     "interview",
-    "live session",
-    "ao vivo",
-    "acústico",
-    "unplugged",
+    "tutorial",
+    "how to",
+    "como fazer",
   ];
 
   // Deve ter pelo menos um indicador de karaoke
@@ -145,40 +137,13 @@ function isValidKaraokeVideo(title: string, channelTitle: string): boolean {
     return false;
   }
 
-  // Não deve ter nenhum indicador de exclusão
+  // Apenas exclui conteúdos muito específicos que definitivamente não são karaoke
   const hasExcludeIndicator = excludeIndicators.some((indicator) =>
     titleLower.includes(indicator)
   );
 
   if (hasExcludeIndicator) {
     return false;
-  }
-
-  // Canais de karaoke conhecidos são mais confiáveis
-  const karaokeChannels = [
-    "karaoke",
-    "lyrics",
-    "letra",
-    "music video",
-    "cartoon",
-  ];
-
-  // Se for de um canal conhecido de karaoke, aumenta confiança
-  const fromKaraokeChannel = karaokeChannels.some((channel) =>
-    channelLower.includes(channel)
-  );
-
-  // Se não for de um canal de karaoke, exige mais critérios
-  if (!fromKaraokeChannel) {
-    // Deve conter "letra" ou "lyrics" explicitamente se não for de canal conhecido
-    const hasExplicitLyrics =
-      titleLower.includes("letra") ||
-      titleLower.includes("lyrics") ||
-      titleLower.includes("com letra");
-
-    if (!hasExplicitLyrics) {
-      return false;
-    }
   }
 
   return true;
