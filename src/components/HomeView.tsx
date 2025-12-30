@@ -37,11 +37,6 @@ export function HomeView() {
     null
   );
   const [finalScore, setFinalScore] = useState(0);
-
-  // Log sempre que showResults mudar
-  useEffect(() => {
-    console.log("🔔 showResults mudou para:", showResults);
-  }, [showResults]);
   const scoreIntervalRef = useRef<number | undefined>(undefined);
   const comboIntervalRef = useRef<number | undefined>(undefined);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -97,35 +92,21 @@ export function HomeView() {
       return;
     }
 
-    console.log("🎬 handleSongEnd INICIADO com score:", scoreRef.current);
-    console.log("🎯 showResults ANTES:", showResults);
+    console.log("🎬🎬🎬 VÍDEO TERMINOU - handleSongEnd executando");
     videoEndedRef.current = true;
 
-    if (scoreIntervalRef.current) {
-      clearInterval(scoreIntervalRef.current);
-      console.log("⏹️ Score interval cleared");
-    }
-    if (comboIntervalRef.current) {
-      clearInterval(comboIntervalRef.current);
-      console.log("⏹️ Combo interval cleared");
-    }
-    if (playerMonitorRef.current) {
-      clearInterval(playerMonitorRef.current);
-      console.log("⏹️ Player monitor cleared");
-    }
+    // Limpa todos os intervals
+    if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
+    if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
+    if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
 
     const finalScoreValue = scoreRef.current || 0;
-    console.log("📊 Final score calculado:", finalScoreValue);
+    console.log("📊 Score final:", finalScoreValue);
 
+    // Define o score e abre o modal
     setFinalScore(finalScoreValue);
-    console.log("✅ setFinalScore chamado com:", finalScoreValue);
-
-    // Usar setTimeout para garantir que o estado seja atualizado
-    setTimeout(() => {
-      console.log("⏰ setTimeout executado - abrindo modal agora!");
-      setShowResults(true);
-      console.log("🎉 setShowResults(true) chamado!");
-    }, 100);
+    setShowResults(true);
+    console.log("✅ Modal aberto com score:", finalScoreValue);
 
     toast.success("🎉 Música finalizada! Confira sua nota!", {
       duration: 5000,
@@ -742,23 +723,6 @@ export function HomeView() {
         songTitle={currentSong?.title || ""}
         songArtist={currentSong?.artist || ""}
       />
-
-      {/* Botão de debug - remover depois */}
-      {currentSong && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <Button
-            onClick={() => {
-              console.log("🔴 TESTE MANUAL - Forçando abertura do modal");
-              console.log("Score atual:", scoreRef.current);
-              setFinalScore(scoreRef.current);
-              setShowResults(true);
-            }}
-            className="bg-red-500 hover:bg-red-600"
-          >
-            🧪 Testar Modal
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
