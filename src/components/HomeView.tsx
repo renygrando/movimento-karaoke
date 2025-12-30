@@ -540,7 +540,7 @@ export function HomeView() {
                 ) : (
                   <iframe
                     ref={iframeRef}
-                    src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&controls=1&modestbranding=1&rel=0&enablejsapi=1`}
+                    src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&controls=1&modestbranding=1&rel=0&enablejsapi=1&iv_load_policy=3&fs=1&cc_load_policy=0&playsinline=1&loop=0`}
                     title={currentSong.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     referrerPolicy="strict-origin-when-cross-origin"
