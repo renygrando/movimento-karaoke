@@ -14,7 +14,6 @@ import {
 import { Song } from "@/contexts/KaraokeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { MicrophoneVisualizer } from "./MicrophoneVisualizer";
-import { ResultsModal } from "./ResultsModal";
 import { toast } from "sonner";
 
 export function HomeView() {
@@ -28,22 +27,17 @@ export function HomeView() {
 
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
-
-  const [showResults, setShowResults] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isCheckingCompatibility, setIsCheckingCompatibility] = useState(false);
   const [compatibilityError, setCompatibilityError] = useState<string | null>(
     null
   );
-  const [finalScore, setFinalScore] = useState(0);
   const scoreIntervalRef = useRef<number | undefined>(undefined);
   const comboIntervalRef = useRef<number | undefined>(undefined);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerReadyRef = useRef(false);
   const scoreRef = useRef(0);
-  const videoEndedRef = useRef(false);
-  const endVideoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -77,10 +71,8 @@ export function HomeView() {
     setCurrentSong(song);
     setScore(0);
     setCombo(0);
-    setFinalScore(0);
     scoreRef.current = 0;
     playerReadyRef.current = false;
-    videoEndedRef.current = false;
     toast.success("🎤 Tocando agora!", {
       description: `${song.title} - ${song.artist}`,
     });
@@ -88,29 +80,12 @@ export function HomeView() {
 
   const handleSongEnd = useCallback(() => {
     console.log("\n🎬 handleSongEnd chamado");
-    console.log("videoEndedRef.current:", videoEndedRef.current);
-
-    if (videoEndedRef.current) {
-      console.log("⚠️ Já processado");
-      return;
-    }
-
-    videoEndedRef.current = true;
-
+    
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
-    if (endVideoTimeoutRef.current) clearTimeout(endVideoTimeoutRef.current);
 
     const finalScoreValue = scoreRef.current || 0;
     console.log("📊 Score:", finalScoreValue);
-    console.log("🔧 Chamando setFinalScore e setShowResults");
-
-    setFinalScore(finalScoreValue);
-    setShowResults(true);
-
-    console.log("✅ setShowResults(true) executado\n");
-
-    toast.success("🎉 Música finalizada!", { duration: 5000 });
   }, []);
 
   useEffect(() => {
@@ -163,26 +138,6 @@ export function HomeView() {
   useEffect(() => {
     if (!currentSong || !isReady) return;
 
-    console.log("⚡ Iniciando monitoramento para:", currentSong.title);
-    videoEndedRef.current = false;
-
-    // Busca a duração do vídeo
-    getVideoDuration(currentSong.youtubeId).then((duration) => {
-      if (duration > 0) {
-        console.log("⏱️ Vídeo durará:", duration, "segundos");
-
-        // Adiciona 2 segundos de buffer para garantir que o vídeo terminou
-        const timeToWait = (duration + 2) * 1000;
-
-        endVideoTimeoutRef.current = setTimeout(() => {
-          console.log("⏰ Timeout acionado - vídeo terminou naturalmente");
-          if (!videoEndedRef.current) {
-            handleSongEnd();
-          }
-        }, timeToWait);
-      }
-    });
-
     // Score interval
     scoreIntervalRef.current = window.setInterval(() => {
       const baseIncrease = Math.floor(Math.random() * 100) + 50;
@@ -203,9 +158,8 @@ export function HomeView() {
     return () => {
       if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
       if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
-      if (endVideoTimeoutRef.current) clearTimeout(endVideoTimeoutRef.current);
     };
-  }, [currentSong, isReady, combo, handleSongEnd]);
+  }, [currentSong, isReady, combo]);
 
   const handlePlayerError = () => {
     if (!hasError) {
@@ -229,28 +183,13 @@ export function HomeView() {
   const handleSkipSong = () => {
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
-    if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
     setIsReady(false);
     setHasError(false);
     setCompatibilityError(null);
     setCurrentSong(null);
     setScore(0);
     setCombo(0);
-    setFinalScore(0);
     scoreRef.current = 0;
-    videoEndedRef.current = false;
-  };
-
-  const handleResultsClose = () => {
-    setShowResults(false);
-    setIsReady(false);
-    setHasError(false);
-    setCurrentSong(null);
-    setScore(0);
-    setCombo(0);
-    setFinalScore(0);
-    scoreRef.current = 0;
-    videoEndedRef.current = false;
   };
 
   const getErrorMessage = () => {
@@ -491,19 +430,6 @@ export function HomeView() {
                 )}
               </div>
 
-              {/* Botão Terminar Música - visível quando player está ok */}
-              {!isCheckingCompatibility && !hasError && currentSong && (
-                <div className="mt-6 flex justify-center">
-                  <Button
-                    onClick={handleSongEnd}
-                    size="lg"
-                    className="gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-['Exo_2'] font-bold px-12 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.5)]"
-                  >
-                    ✅ Terminar Música
-                  </Button>
-                </div>
-              )}
-
               {/* Song Info Card */}
               <motion.div
                 initial={{ opacity: 0 }}
@@ -637,14 +563,6 @@ export function HomeView() {
           </motion.div>
         )}
       </div>
-
-      <ResultsModal
-        open={showResults}
-        onClose={handleResultsClose}
-        score={finalScore}
-        songTitle={currentSong?.title || ""}
-        songArtist={currentSong?.artist || ""}
-      />
     </div>
   );
 }
