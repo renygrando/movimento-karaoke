@@ -41,6 +41,7 @@ export function HomeView() {
   const comboIntervalRef = useRef<number | undefined>(undefined);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerReadyRef = useRef(false);
+  const scoreRef = useRef(0);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -175,7 +176,11 @@ export function HomeView() {
       const comboMultiplier = 1 + combo * 0.1;
       const totalIncrease = Math.floor(baseIncrease * comboMultiplier);
 
-      setScore((prevScore) => prevScore + totalIncrease);
+      setScore((prevScore) => {
+        const newScore = prevScore + totalIncrease;
+        scoreRef.current = newScore;
+        return newScore;
+      });
     }, 2500);
 
     comboIntervalRef.current = window.setInterval(() => {
@@ -191,7 +196,7 @@ export function HomeView() {
   const handleSongEnd = () => {
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
-    setFinalScore(score);
+    setFinalScore(scoreRef.current);
     setShowResults(true);
   };
 
@@ -224,6 +229,7 @@ export function HomeView() {
     setScore(0);
     setCombo(0);
     setFinalScore(0);
+    scoreRef.current = 0;
   };
 
   const handleResultsClose = () => {
@@ -234,6 +240,7 @@ export function HomeView() {
     setScore(0);
     setCombo(0);
     setFinalScore(0);
+    scoreRef.current = 0;
   };
 
   const getErrorMessage = () => {
