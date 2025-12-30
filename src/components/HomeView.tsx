@@ -164,75 +164,93 @@ export function HomeView() {
   }, [currentSong]);
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (
-        event.origin !== "https://www.youtube.com" &&
-        event.origin !== "https://www.youtube-nocookie.com"
-      )
-        return;
-
-      try {
-        const data =
-          typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-
-        if (!data || typeof data !== "object") return;
-
-        console.log("YouTube event received:", data);
-
-        if (data.event === "onReady") {
-          playerReadyRef.current = true;
-          setIsReady(true);
-          setHasError(false);
-          console.log("✅ Player is ready - começando a monitorar");
-          videoEndedRef.current = false;
+    let messageHandler: ((event: MessageEvent) => void) | null = null;
+    
+    const setupListener = () => {
+      messageHandler = (event: MessageEvent) => {
+        // Aceita mensagens do YouTube
+        if (
+          event.origin !== "https://www.youtube.com" &&
+          event.origin !== "https://www.youtube-nocookie.com"
+        ) {
+          return;
         }
 
-        if (data.event === "onStateChange") {
-          const state = data.info;
-          const stateNames: Record<number, string> = {
-            "-1": "UNSTARTED",
-            "0": "ENDED",
-            "1": "PLAYING",
-            "2": "PAUSED",
-            "3": "BUFFERING",
-            "5": "VIDEO_CUED",
-          };
-          console.log(
-            `📺 Estado do player: ${
-              stateNames[state] || "DESCONHECIDO"
-            } (${state})`
-          );
-
-          // 0 = ENDED
-          if (state === 0 && !videoEndedRef.current) {
-            console.log("🎬 VÍDEO TERMINOU! Chamando handleSongEnd");
-            videoEndedRef.current = true;
-            handleSongEnd();
+        try {
+          let data = event.data;
+          
+          // Tenta fazer parse se for string
+          if (typeof data === "string") {
+            try {
+              data = JSON.parse(data);
+            } catch {
+              return; // Ignora se não for JSON válido
+            }
           }
-        }
 
-        if (data.event === "onError" || data.error) {
-          console.log("❌ Player error:", data);
-          handlePlayerError();
+          if (!data || typeof data !== "object" || !data.event) return;
+
+          console.log("📨 YouTube event:", data.event, data.info);
+
+          // Player pronto
+          if (data.event === "onReady") {
+            console.log("✅ Player pronto!");
+            playerReadyRef.current = true;
+            setIsReady(true);
+            setHasError(false);
+            videoEndedRef.current = false;
+          }
+
+          // Mudança de estado do player
+          if (data.event === "onStateChange") {
+            const state = data.info;
+            
+            if (state === -1) console.log("⏸️ Player: UNSTARTED");
+            if (state === 0) console.log("🏁 Player: ENDED");
+            if (state === 1) console.log("▶️ Player: PLAYING");
+            if (state === 2) console.log("⏸️ Player: PAUSED");
+            if (state === 3) console.log("⏳ Player: BUFFERING");
+            if (state === 5) console.log("📼 Player: CUED");
+
+            // ESTADO 0 = VÍDEO TERMINOU
+            if (state === 0) {
+              if (!videoEndedRef.current) {
+                console.log("🎬🎬🎬 VÍDEO TERMINOU! Chamando handleSongEnd");
+                handleSongEnd();
+              } else {
+                console.log("⚠️ Vídeo já foi finalizado, ignorando evento duplicado");
+              }
+            }
+          }
+
+          // Erro do player
+          if (data.event === "onError") {
+            console.log("❌ Erro no player:", data);
+            handlePlayerError();
+          }
+        } catch (error) {
+          // Silenciosamente ignora erros
         }
-      } catch (e) {
-        // Silenciosamente ignora erros de parsing para eventos que não são JSON
-      }
+      };
+
+      window.addEventListener("message", messageHandler);
+      console.log("🎧 Event listener adicionado");
     };
 
-    window.addEventListener("message", handleMessage);
-    console.log("📡 Message listener configurado");
+    setupListener();
 
     return () => {
-      window.removeEventListener("message", handleMessage);
-      console.log("📡 Message listener removido");
+      if (messageHandler) {
+        window.removeEventListener("message", messageHandler);
+        console.log("🎧 Event listener removido");
+      }
     };
   }, [handleSongEnd]);
 
   useEffect(() => {
     if (!currentSong || !isReady) return;
 
-    console.log("Starting score interval for song:", currentSong.title);
+    console.log("⚡ Starting score interval for song:", currentSong.title);
     videoEndedRef.current = false;
 
     scoreIntervalRef.current = window.setInterval(() => {
@@ -251,25 +269,9 @@ export function HomeView() {
       setCombo((prevCombo) => Math.min(prevCombo + 1, 10));
     }, 3000);
 
-    // Monitora o estado do player a cada segundo
-    playerMonitorRef.current = window.setInterval(() => {
-      if (
-        iframeRef.current &&
-        iframeRef.current.contentWindow &&
-        !videoEndedRef.current
-      ) {
-        // Requisita informações de tempo do player
-        iframeRef.current.contentWindow.postMessage(
-          JSON.stringify({ event: "listening" }),
-          "*"
-        );
-      }
-    }, 500);
-
     return () => {
       if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
       if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
-      if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
     };
   }, [currentSong, isReady, combo]);
 
@@ -577,22 +579,6 @@ export function HomeView() {
                   </h3>
                 </div>
                 <MicrophoneVisualizer />
-              </motion.div>
-
-              {/* Botão de Finalizar */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="flex justify-center gap-4"
-              >
-                <Button
-                  onClick={handleSongEnd}
-                  size="lg"
-                  className="gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-['Exo_2'] font-bold px-8 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.5)]"
-                >
-                  🏁 Finalizar e Ver Nota
-                </Button>
               </motion.div>
             </motion.section>
           )}
