@@ -104,13 +104,17 @@ export function ResultsModal({
   songTitle,
   songArtist,
 }: ResultsModalProps) {
+  console.log("\n🎭 ResultsModal RENDER - open:", open, "score:", score);
+  
   const [stars, setStars] = useState(0);
   const [compliment, setCompliment] = useState("");
   const [rating, setRating] = useState(0);
   const [thankYouMessage, setThankYouMessage] = useState("");
 
   useEffect(() => {
+    console.log("🎭 ResultsModal useEffect - open:", open);
     if (open) {
+      console.log("✅ Modal aberto! Gerando dados...");
       const newRating = generateRating(score);
       setRating(newRating);
 
@@ -121,6 +125,7 @@ export function ResultsModal({
         compliments[Math.floor(Math.random() * compliments.length)]
       );
       setThankYouMessage(getThankYouMessage(newRating));
+      console.log("✅ Dados do modal gerados - Rating:", newRating);
     }
   }, [open, score]);
 
