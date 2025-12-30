@@ -42,6 +42,8 @@ export function HomeView() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerReadyRef = useRef(false);
   const scoreRef = useRef(0);
+  const playerMonitorRef = useRef<number | undefined>(undefined);
+  const videoEndedRef = useRef(false);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -86,10 +88,15 @@ export function HomeView() {
     console.log("handleSongEnd called with score:", scoreRef.current);
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
+    if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
     console.log("Setting finalScore to:", scoreRef.current);
     console.log("Setting showResults to true");
+    videoEndedRef.current = true;
     setFinalScore(scoreRef.current);
     setShowResults(true);
+    toast.success("🎉 Vídeo finalizado! Confira sua nota!", {
+      duration: 5000,
+    });
   };
 
   useEffect(() => {
@@ -151,51 +158,61 @@ export function HomeView() {
         const data =
           typeof event.data === "string" ? JSON.parse(event.data) : event.data;
 
+        if (!data || typeof data !== "object") return;
+
         console.log("YouTube event received:", data);
 
         if (data.event === "onReady") {
           playerReadyRef.current = true;
           setIsReady(true);
           setHasError(false);
-          console.log("Player is ready");
-          
-          // Inicia monitoramento de progresso do vídeo
-          if (iframeRef.current && iframeRef.current.contentWindow) {
-            // Pede ao player para monitorar mudanças de estado
-            iframeRef.current.contentWindow.postMessage(
-              '{"event":"listening"}',
-              "*"
-            );
-          }
+          console.log("✅ Player is ready - começando a monitorar");
+          videoEndedRef.current = false;
         }
 
         if (data.event === "onStateChange") {
-          console.log("State changed to:", data.info);
+          const state = data.info;
+          const stateNames: Record<number, string> = {
+            "-1": "UNSTARTED",
+            "0": "ENDED",
+            "1": "PLAYING",
+            "2": "PAUSED",
+            "3": "BUFFERING",
+            "5": "VIDEO_CUED",
+          };
+          console.log(`📺 Estado do player: ${stateNames[state] || "DESCONHECIDO"} (${state})`);
+
           // 0 = ENDED
-          if (data.info === 0) {
-            console.log("Video ended, calling handleSongEnd");
+          if (state === 0 && !videoEndedRef.current) {
+            console.log("🎬 VÍDEO TERMINOU! Chamando handleSongEnd");
+            videoEndedRef.current = true;
             handleSongEnd();
           }
         }
 
         if (data.event === "onError" || data.error) {
-          console.log("Player error:", data);
+          console.log("❌ Player error:", data);
           handlePlayerError();
         }
       } catch (e) {
-        console.error("Error parsing player message:", e);
+        // Silenciosamente ignora erros de parsing para eventos que não são JSON
       }
     };
 
     window.addEventListener("message", handleMessage);
+    console.log("📡 Message listener configurado");
 
     return () => {
       window.removeEventListener("message", handleMessage);
+      console.log("📡 Message listener removido");
     };
   }, [handleSongEnd]);
 
   useEffect(() => {
     if (!currentSong || !isReady) return;
+
+    console.log("Starting score interval for song:", currentSong.title);
+    videoEndedRef.current = false;
 
     scoreIntervalRef.current = window.setInterval(() => {
       const baseIncrease = Math.floor(Math.random() * 100) + 50;
@@ -213,9 +230,21 @@ export function HomeView() {
       setCombo((prevCombo) => Math.min(prevCombo + 1, 10));
     }, 3000);
 
+    // Monitora o estado do player a cada segundo
+    playerMonitorRef.current = window.setInterval(() => {
+      if (iframeRef.current && iframeRef.current.contentWindow && !videoEndedRef.current) {
+        // Requisita informações de tempo do player
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: "listening" }),
+          "*"
+        );
+      }
+    }, 500);
+
     return () => {
       if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
       if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
+      if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
     };
   }, [currentSong, isReady, combo]);
 
@@ -241,6 +270,7 @@ export function HomeView() {
   const handleSkipSong = () => {
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
+    if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
     setIsReady(false);
     setHasError(false);
     setCompatibilityError(null);
@@ -249,6 +279,7 @@ export function HomeView() {
     setCombo(0);
     setFinalScore(0);
     scoreRef.current = 0;
+    videoEndedRef.current = false;
   };
 
   const handleResultsClose = () => {
@@ -260,6 +291,7 @@ export function HomeView() {
     setCombo(0);
     setFinalScore(0);
     scoreRef.current = 0;
+    videoEndedRef.current = false;
   };
 
   const getErrorMessage = () => {
