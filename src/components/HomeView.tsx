@@ -3,7 +3,7 @@ import { useKaraoke } from "@/contexts/KaraokeContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SongCard } from "./SongCard";
-import { searchYouTubeKaraoke } from "@/lib/youtubeApi";
+import { searchYouTubeKaraoke, getVideoDuration } from "@/lib/youtubeApi";
 import {
   MagnifyingGlass,
   Warning,
@@ -42,9 +42,8 @@ export function HomeView() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerReadyRef = useRef(false);
   const scoreRef = useRef(0);
-  const playerMonitorRef = useRef<number | undefined>(undefined);
   const videoEndedRef = useRef(false);
-  const playerInstanceRef = useRef<any>(null);
+  const endVideoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -88,16 +87,12 @@ export function HomeView() {
   };
 
   const handleSongEnd = useCallback(() => {
-    console.log("\n\n");
+    console.log("\n\n═══════════════════════════════════════════════════════");
+    console.log("🎬🎬🎬 VÍDEO TERMINOU - Abrindo Modal 🎬🎬🎬");
     console.log("═══════════════════════════════════════════════════════");
-    console.log("🎬🎬🎬 handleSongEnd EXECUTANDO 🎬🎬🎬");
-    console.log("═══════════════════════════════════════════════════════");
-    console.log("videoEndedRef.current:", videoEndedRef.current);
-    console.log("scoreRef.current:", scoreRef.current);
     
     if (videoEndedRef.current) {
-      console.log("⚠️ Já foi chamado antes, ignorando");
-      console.log("═══════════════════════════════════════════════════════\n\n");
+      console.log("⚠️ Já foi processado");
       return;
     }
 
@@ -106,18 +101,15 @@ export function HomeView() {
     // Limpa todos os intervals
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
-    if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
+    if (endVideoTimeoutRef.current) clearTimeout(endVideoTimeoutRef.current);
 
     const finalScoreValue = scoreRef.current || 0;
     console.log("📊 Score final:", finalScoreValue);
-
-    console.log("Executando: setFinalScore(" + finalScoreValue + ")");
-    setFinalScore(finalScoreValue);
     
-    console.log("Executando: setShowResults(true)");
+    setFinalScore(finalScoreValue);
     setShowResults(true);
     
-    console.log("✅ MODAL DEVERIA ESTAR ABERTO!");
+    console.log("✅ Modal aberto!");
     console.log("═══════════════════════════════════════════════════════\n\n");
 
     toast.success("🎉 Música finalizada! Confira sua nota!", {
@@ -175,60 +167,25 @@ export function HomeView() {
   useEffect(() => {
     if (!currentSong || !isReady) return;
 
-    console.log("⚡ Criando YouTube Player para:", currentSong.title);
+    console.log("⚡ Iniciando monitoramento para:", currentSong.title);
     videoEndedRef.current = false;
 
-    // Cria a instância do player usando a YouTube API
-    const onPlayerReady = () => {
-      console.log("✅ Player pronto e carregado");
-    };
-
-    const onPlayerStateChange = (event: any) => {
-      const state = event.data;
-      console.log("🔄 Player state changed:", state);
-
-      // 0 = ENDED
-      if (state === 0) {
-        console.log("🏁 VÍDEO TERMINOU!");
-        if (!videoEndedRef.current) {
-          handleSongEnd();
-        }
-      }
-      // 1 = PLAYING
-      if (state === 1) {
-        console.log("▶️ PLAYING");
-      }
-      // 2 = PAUSED
-      if (state === 2) {
-        console.log("⏸️ PAUSED");
-      }
-    };
-
-    const onPlayerError = (event: any) => {
-      console.log("❌ Player error:", event.data);
-      handlePlayerError();
-    };
-
-    // Espera a YouTube API estar carregada
-    if ((window as any).YT && (window as any).YT.Player) {
-      try {
-        playerInstanceRef.current = new (window as any).YT.Player(
-          iframeRef.current,
-          {
-            events: {
-              onReady: onPlayerReady,
-              onStateChange: onPlayerStateChange,
-              onError: onPlayerError,
-            },
+    // Busca a duração do vídeo
+    getVideoDuration(currentSong.youtubeId).then((duration) => {
+      if (duration > 0) {
+        console.log("⏱️ Vídeo durará:", duration, "segundos");
+        
+        // Adiciona 2 segundos de buffer para garantir que o vídeo terminou
+        const timeToWait = (duration + 2) * 1000;
+        
+        endVideoTimeoutRef.current = setTimeout(() => {
+          console.log("⏰ Timeout acionado - vídeo deveria ter terminado");
+          if (!videoEndedRef.current) {
+            handleSongEnd();
           }
-        );
-        console.log("✅ YouTube Player instance criada");
-      } catch (error) {
-        console.error("❌ Erro ao criar player instance:", error);
+        }, timeToWait);
       }
-    } else {
-      console.log("⏳ Aguardando YouTube API...");
-    }
+    });
 
     // Score interval
     scoreIntervalRef.current = window.setInterval(() => {
@@ -250,6 +207,7 @@ export function HomeView() {
     return () => {
       if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
       if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
+      if (endVideoTimeoutRef.current) clearTimeout(endVideoTimeoutRef.current);
     };
   }, [currentSong, isReady, combo, handleSongEnd]);
 

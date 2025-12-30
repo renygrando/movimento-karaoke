@@ -172,3 +172,33 @@ function detectLanguage(title: string): string {
 
   return "English";
 }
+
+// Busca a duração do vídeo em segundos
+export async function getVideoDuration(videoId: string): Promise<number> {
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=contentDetails`
+    );
+    const data = await response.json();
+    
+    if (!data.items || data.items.length === 0) {
+      console.log("⚠️ Vídeo não encontrado");
+      return 0;
+    }
+
+    const duration = data.items[0].contentDetails.duration;
+    // Parse ISO 8601 duration (PT1H2M3S format)
+    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    let seconds = 0;
+    
+    if (match?.[1]) seconds += parseInt(match[1]) * 3600; // hours
+    if (match?.[2]) seconds += parseInt(match[2]) * 60;   // minutes
+    if (match?.[3]) seconds += parseInt(match[3]);        // seconds
+    
+    console.log("⏱️ Duração do vídeo:", seconds, "segundos");
+    return seconds;
+  } catch (error) {
+    console.error("Erro ao buscar duração:", error);
+    return 0;
+  }
+}
