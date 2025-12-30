@@ -179,7 +179,7 @@ export function HomeView() {
         const timeToWait = (duration + 2) * 1000;
         
         endVideoTimeoutRef.current = setTimeout(() => {
-          console.log("⏰ Timeout acionado - vídeo deveria ter terminado");
+          console.log("⏰ Timeout acionado - vídeo terminou naturalmente");
           if (!videoEndedRef.current) {
             handleSongEnd();
           }
@@ -461,6 +461,14 @@ export function HomeView() {
                       >
                         <YoutubeLogo size={32} weight="fill" />
                         Abrir no YouTube
+                      </Button>
+
+                      <Button
+                        onClick={handleSongEnd}
+                        size="lg"
+                        className="gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-['Exo_2'] font-bold px-8 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.5)]"
+                      >
+                        ✅ Terminar Música
                       </Button>
 
                       <Button
