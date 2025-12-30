@@ -32,23 +32,14 @@ interface YouTubeSearchResponse {
   };
 }
 
-async function checkVideoEmbeddable(videoId: string): Promise<boolean> {
-  try {
-    const response = await fetch(
-      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
-    );
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
+// Removido: checkVideoEmbeddable já é filtrado pelo parâmetro videoEmbeddable=true da API
 
 export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
   if (!query.trim()) {
     return [];
   }
 
-  // Busca mais aberta - apenas adiciona "karaoke" ao termo
+  // Busca com termo de karaoke
   const searchQuery = `${query} karaoke`;
 
   try {
@@ -59,7 +50,7 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
     url.searchParams.append("videoEmbeddable", "true");
     url.searchParams.append("regionCode", "BR");
     url.searchParams.append("relevanceLanguage", "pt");
-    url.searchParams.append("maxResults", "50"); // Busca 50 para filtrar depois
+    url.searchParams.append("maxResults", "50");
     url.searchParams.append("key", YOUTUBE_API_KEY);
 
     const response = await fetch(url.toString());
@@ -77,30 +68,27 @@ export async function searchYouTubeKaraoke(query: string): Promise<Song[]> {
     const songs: Song[] = [];
 
     for (const item of data.items) {
-      if (songs.length >= 30) break; // Retorna até 30 resultados
+      if (songs.length >= 50) break; // Retorna até 50 resultados
 
       // Validar se é um vídeo de karaoke
       if (!isValidKaraokeVideo(item.snippet.title, item.snippet.channelTitle)) {
         continue;
       }
 
-      const isEmbeddable = await checkVideoEmbeddable(item.id.videoId);
-
-      if (isEmbeddable) {
-        songs.push({
-          id: `yt-${item.id.videoId}`,
-          title: cleanTitle(item.snippet.title),
-          artist: item.snippet.channelTitle,
-          youtubeId: item.id.videoId,
-          thumbnail:
-            item.snippet.thumbnails.high?.url ||
-            item.snippet.thumbnails.medium?.url ||
-            item.snippet.thumbnails.default?.url,
-          duration: 0,
-          category: "Busca YouTube",
-          language: "Portuguese",
-        });
-      }
+      // Removido checkVideoEmbeddable - já filtrado por videoEmbeddable=true
+      songs.push({
+        id: `yt-${item.id.videoId}`,
+        title: cleanTitle(item.snippet.title),
+        artist: item.snippet.channelTitle,
+        youtubeId: item.id.videoId,
+        thumbnail:
+          item.snippet.thumbnails.high?.url ||
+          item.snippet.thumbnails.medium?.url ||
+          item.snippet.thumbnails.default?.url,
+        duration: 0,
+        category: "Busca YouTube",
+        language: "Portuguese",
+      });
     }
 
     return songs;
@@ -124,6 +112,9 @@ function isValidKaraokeVideo(title: string, channelTitle: string): boolean {
     "cover",
     "sing along",
     "backing track",
+    "acapella",
+    "instrumental",
+    "playback",
   ];
 
   // Filtros para EXCLUIR - conteúdos que definitivamente NÃO são karaoke
@@ -142,6 +133,10 @@ function isValidKaraokeVideo(title: string, channelTitle: string): boolean {
     "analysis",
     "crítica",
     "review",
+    "behind the scenes",
+    "bastidores",
+    "clipe oficial",
+    "official video",
   ];
 
   // Deve ter pelo menos um indicador de karaoke

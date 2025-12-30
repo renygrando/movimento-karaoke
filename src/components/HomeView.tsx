@@ -80,7 +80,7 @@ export function HomeView() {
 
   const handleSongEnd = useCallback(() => {
     console.log("\n🎬 handleSongEnd chamado");
-    
+
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
 
