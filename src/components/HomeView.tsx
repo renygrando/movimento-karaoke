@@ -186,15 +186,6 @@ export function HomeView() {
       messageHandler = (event: MessageEvent) => {
         console.log("📨 Mensagem recebida do origin:", event.origin);
         
-        // Aceita mensagens do YouTube
-        if (
-          event.origin !== "https://www.youtube.com" &&
-          event.origin !== "https://www.youtube-nocookie.com"
-        ) {
-          console.log("❌ Origin não permitido, ignorando");
-          return;
-        }
-
         try {
           let data = event.data;
           
