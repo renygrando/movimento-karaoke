@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
 import { songDatabase } from '@/lib/songDatabase'
 
 // Hook para usar localStorage como fallback quando Spark KV falha

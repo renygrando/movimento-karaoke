@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useKaraoke } from "@/contexts/KaraokeContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -84,7 +84,7 @@ export function HomeView() {
     });
   };
 
-  const handleSongEnd = () => {
+  const handleSongEnd = useCallback(() => {
     console.log("handleSongEnd called with score:", scoreRef.current);
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
@@ -97,7 +97,7 @@ export function HomeView() {
     toast.success("🎉 Vídeo finalizado! Confira sua nota!", {
       duration: 5000,
     });
-  };
+  }, []);
 
   useEffect(() => {
     const checkVideoCompatibility = async () => {
