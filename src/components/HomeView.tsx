@@ -82,6 +82,16 @@ export function HomeView() {
     });
   };
 
+  const handleSongEnd = () => {
+    console.log("handleSongEnd called with score:", scoreRef.current);
+    if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
+    if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
+    console.log("Setting finalScore to:", scoreRef.current);
+    console.log("Setting showResults to true");
+    setFinalScore(scoreRef.current);
+    setShowResults(true);
+  };
+
   useEffect(() => {
     const checkVideoCompatibility = async () => {
       if (!currentSong) return;
@@ -148,10 +158,20 @@ export function HomeView() {
           setIsReady(true);
           setHasError(false);
           console.log("Player is ready");
+          
+          // Inicia monitoramento de progresso do vídeo
+          if (iframeRef.current && iframeRef.current.contentWindow) {
+            // Pede ao player para monitorar mudanças de estado
+            iframeRef.current.contentWindow.postMessage(
+              '{"event":"listening"}',
+              "*"
+            );
+          }
         }
 
         if (data.event === "onStateChange") {
           console.log("State changed to:", data.info);
+          // 0 = ENDED
           if (data.info === 0) {
             console.log("Video ended, calling handleSongEnd");
             handleSongEnd();
@@ -172,7 +192,7 @@ export function HomeView() {
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, []);
+  }, [handleSongEnd]);
 
   useEffect(() => {
     if (!currentSong || !isReady) return;
@@ -198,14 +218,6 @@ export function HomeView() {
       if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
     };
   }, [currentSong, isReady, combo]);
-
-  const handleSongEnd = () => {
-    console.log("handleSongEnd called with score:", scoreRef.current);
-    if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
-    if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
-    setFinalScore(scoreRef.current);
-    setShowResults(true);
-  };
 
   const handlePlayerError = () => {
     if (!hasError) {
