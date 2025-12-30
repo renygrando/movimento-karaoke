@@ -89,7 +89,7 @@ export function HomeView() {
   const handleSongEnd = useCallback(() => {
     console.log("\n🎬 handleSongEnd chamado");
     console.log("videoEndedRef.current:", videoEndedRef.current);
-    
+
     if (videoEndedRef.current) {
       console.log("⚠️ Já processado");
       return;
@@ -490,6 +490,19 @@ export function HomeView() {
                   />
                 )}
               </div>
+
+              {/* Botão Terminar Música - visível quando player está ok */}
+              {!isCheckingCompatibility && !hasError && currentSong && (
+                <div className="mt-6 flex justify-center">
+                  <Button
+                    onClick={handleSongEnd}
+                    size="lg"
+                    className="gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-['Exo_2'] font-bold px-12 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.5)]"
+                  >
+                    ✅ Terminar Música
+                  </Button>
+                </div>
+              )}
 
               {/* Song Info Card */}
               <motion.div
