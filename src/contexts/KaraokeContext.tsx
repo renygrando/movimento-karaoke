@@ -1,6 +1,33 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { songDatabase } from '@/lib/songDatabase'
+
+// Hook para usar localStorage como fallback quando Spark KV falha
+function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    try {
+      const item = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null
+      return item ? JSON.parse(item) : initialValue
+    } catch (error) {
+      console.error(`Error reading localStorage key "${key}":`, error)
+      return initialValue
+    }
+  })
+
+  const setValue = useCallback((value: T | ((val: T) => T)) => {
+    try {
+      const valueToStore = value instanceof Function ? value(storedValue) : value
+      setStoredValue(valueToStore)
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(key, JSON.stringify(valueToStore))
+      }
+    } catch (error) {
+      console.error(`Error setting localStorage key "${key}":`, error)
+    }
+  }, [storedValue])
+
+  return [storedValue, setValue]
+}
 
 export interface Song {
   id: string
@@ -58,14 +85,16 @@ const KaraokeContext = createContext<KaraokeContextType | undefined>(undefined)
 
 export function KaraokeProvider({ children }: { children: ReactNode }) {
   const [currentSong, setCurrentSong] = useState<Song | null>(null)
-  const [queue, setQueue] = useKV<Song[]>('karaoke-queue', [])
+  
+  // Tenta usar Spark KV, mas fallback para localStorage se falhar
+  const [queue, setQueue] = useLocalStorage<Song[]>('karaoke-queue', [])
   const [score, setScore] = useState(0)
   const [combo, setCombo] = useState(0)
   const [isMicActive, setIsMicActive] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [favorites, setFavorites] = useKV<string[]>('karaoke-favorites', [])
-  const [playlists, setPlaylists] = useKV<Playlist[]>('karaoke-playlists', [])
-  const [discoveredSongs, setDiscoveredSongs] = useKV<Record<string, Song>>('karaoke-discovered-songs', {})
+  const [favorites, setFavorites] = useLocalStorage<string[]>('karaoke-favorites', [])
+  const [playlists, setPlaylists] = useLocalStorage<Playlist[]>('karaoke-playlists', [])
+  const [discoveredSongs, setDiscoveredSongs] = useLocalStorage<Record<string, Song>>('karaoke-discovered-songs', {})
   
   const getSongById = useCallback((songId: string): Song | undefined => {
     return (discoveredSongs || {})[songId] || songDatabase.find((s: Song) => s.id === songId)
