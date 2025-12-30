@@ -141,19 +141,25 @@ export function HomeView() {
         const data =
           typeof event.data === "string" ? JSON.parse(event.data) : event.data;
 
+        console.log("YouTube event received:", data);
+
         if (data.event === "onReady") {
           playerReadyRef.current = true;
           setIsReady(true);
           setHasError(false);
+          console.log("Player is ready");
         }
 
         if (data.event === "onStateChange") {
+          console.log("State changed to:", data.info);
           if (data.info === 0) {
+            console.log("Video ended, calling handleSongEnd");
             handleSongEnd();
           }
         }
 
         if (data.event === "onError" || data.error) {
+          console.log("Player error:", data);
           handlePlayerError();
         }
       } catch (e) {
@@ -166,7 +172,7 @@ export function HomeView() {
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, [currentSong]);
+  }, []);
 
   useEffect(() => {
     if (!currentSong || !isReady) return;
@@ -194,6 +200,7 @@ export function HomeView() {
   }, [currentSong, isReady, combo]);
 
   const handleSongEnd = () => {
+    console.log("handleSongEnd called with score:", scoreRef.current);
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
     setFinalScore(scoreRef.current);
@@ -462,7 +469,7 @@ export function HomeView() {
                 ) : (
                   <iframe
                     ref={iframeRef}
-                    src={`https://www.youtube-nocookie.com/embed/${currentSong.youtubeId}?autoplay=1&controls=1&modestbranding=1&rel=0&enablejsapi=1`}
+                    src={`https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&controls=1&modestbranding=1&rel=0&enablejsapi=1`}
                     title={currentSong.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     referrerPolicy="strict-origin-when-cross-origin"

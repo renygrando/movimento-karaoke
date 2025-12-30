@@ -111,6 +111,7 @@ export function ResultsModal({
 
   useEffect(() => {
     if (open) {
+      console.log("ResultsModal opened with score:", score);
       const newRating = generateRating(score);
       setRating(newRating);
 
