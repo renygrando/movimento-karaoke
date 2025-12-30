@@ -44,6 +44,7 @@ export function HomeView() {
   const scoreRef = useRef(0);
   const playerMonitorRef = useRef<number | undefined>(undefined);
   const videoEndedRef = useRef(false);
+  const playerInstanceRef = useRef<any>(null);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -172,110 +173,64 @@ export function HomeView() {
   }, [currentSong]);
 
   useEffect(() => {
-    let messageHandler: ((event: MessageEvent) => void) | null = null;
-
-    const setupListener = () => {
-      messageHandler = (event: MessageEvent) => {
-        try {
-          let data = event.data;
-          
-          // Se for string vazia ou undefined, ignora
-          if (!data) {
-            return;
-          }
-
-          // Tenta fazer parse se for string
-          if (typeof data === "string") {
-            // Se for string vazia, ignora
-            if (data.trim() === "") {
-              return;
-            }
-            
-            try {
-              data = JSON.parse(data);
-            } catch {
-              // Se não conseguir fazer parse, ignora silenciosamente
-              return;
-            }
-          }
-
-          if (!data || typeof data !== "object") {
-            return;
-          }
-
-          // Verifica se tem event
-          if (!data.event) {
-            return;
-          }
-
-          console.log("🎯 Event recebido:", data.event, "Info:", data.info);
-
-          // Player pronto
-          if (data.event === "onReady") {
-            console.log("✅ Player pronto!");
-            playerReadyRef.current = true;
-            setIsReady(true);
-            setHasError(false);
-            videoEndedRef.current = false;
-          }
-
-          // Mudança de estado do player
-          if (data.event === "onStateChange") {
-            const state = data.info;
-            console.log("🔄 onStateChange - Estado:", state);
-
-            if (state === 0) {
-              console.log("🏁 VÍDEO TERMINOU (state = 0)!");
-              if (!videoEndedRef.current) {
-                console.log("🎬 Chamando handleSongEnd");
-                handleSongEnd();
-              }
-            }
-          }
-
-          // Resposta do getPlayerState (usado pelo polling)
-          if (data.event === "infoDelivery" && data.info) {
-            if (typeof data.info.playerState !== "undefined") {
-              const state = data.info.playerState;
-              console.log("📊 infoDelivery - playerState:", state);
-
-              if (state === 0 && !videoEndedRef.current) {
-                console.log("🎯 POLLING detectou fim!");
-                handleSongEnd();
-              }
-            }
-          }
-
-          // Erro do player
-          if (data.event === "onError") {
-            console.log("❌ Erro no player:", data);
-            handlePlayerError();
-          }
-        } catch (error) {
-          console.error("Erro ao processar mensagem:", error);
-        }
-      };
-
-      window.addEventListener("message", messageHandler);
-      console.log("✅ Event listener adicionado");
-    };
-
-    setupListener();
-
-    return () => {
-      if (messageHandler) {
-        window.removeEventListener("message", messageHandler);
-        console.log("🧹 Event listener removido");
-      }
-    };
-  }, [handleSongEnd]);
-
-  useEffect(() => {
     if (!currentSong || !isReady) return;
 
-    console.log("⚡ Starting score interval for song:", currentSong.title);
+    console.log("⚡ Criando YouTube Player para:", currentSong.title);
     videoEndedRef.current = false;
 
+    // Cria a instância do player usando a YouTube API
+    const onPlayerReady = () => {
+      console.log("✅ Player pronto e carregado");
+    };
+
+    const onPlayerStateChange = (event: any) => {
+      const state = event.data;
+      console.log("🔄 Player state changed:", state);
+
+      // 0 = ENDED
+      if (state === 0) {
+        console.log("🏁 VÍDEO TERMINOU!");
+        if (!videoEndedRef.current) {
+          handleSongEnd();
+        }
+      }
+      // 1 = PLAYING
+      if (state === 1) {
+        console.log("▶️ PLAYING");
+      }
+      // 2 = PAUSED
+      if (state === 2) {
+        console.log("⏸️ PAUSED");
+      }
+    };
+
+    const onPlayerError = (event: any) => {
+      console.log("❌ Player error:", event.data);
+      handlePlayerError();
+    };
+
+    // Espera a YouTube API estar carregada
+    if ((window as any).YT && (window as any).YT.Player) {
+      try {
+        playerInstanceRef.current = new (window as any).YT.Player(
+          iframeRef.current,
+          {
+            events: {
+              onReady: onPlayerReady,
+              onStateChange: onPlayerStateChange,
+              onError: onPlayerError,
+            },
+          }
+        );
+        console.log("✅ YouTube Player instance criada");
+      } catch (error) {
+        console.error("❌ Erro ao criar player instance:", error);
+      }
+    } else {
+      console.log("⏳ Aguardando YouTube API...");
+    }
+
+    // Score interval
     scoreIntervalRef.current = window.setInterval(() => {
       const baseIncrease = Math.floor(Math.random() * 100) + 50;
       const comboMultiplier = 1 + combo * 0.1;
@@ -292,26 +247,11 @@ export function HomeView() {
       setCombo((prevCombo) => Math.min(prevCombo + 1, 10));
     }, 3000);
 
-    // Polling para verificar estado do player a cada segundo
-    playerMonitorRef.current = window.setInterval(() => {
-      const iframe = iframeRef.current;
-      if (iframe && iframe.contentWindow) {
-        // Solicita o estado atual do player
-        iframe.contentWindow.postMessage(
-          '{"event":"command","func":"getPlayerState","args":""}',
-          "*"
-        );
-      }
-    }, 1000);
-
-    console.log("✅ Polling iniciado para monitorar estado do player");
-
     return () => {
       if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
       if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
-      if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
     };
-  }, [currentSong, isReady, combo]);
+  }, [currentSong, isReady, combo, handleSongEnd]);
 
   const handlePlayerError = () => {
     if (!hasError) {
