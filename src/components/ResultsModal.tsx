@@ -110,9 +110,11 @@ export function ResultsModal({
   const [thankYouMessage, setThankYouMessage] = useState("");
 
   useEffect(() => {
+    console.log("ResultsModal effect triggered - open:", open, "score:", score);
     if (open) {
-      console.log("ResultsModal opened with score:", score);
+      console.log("✅ ResultsModal opened with score:", score);
       const newRating = generateRating(score);
+      console.log("📊 Generated rating:", newRating);
       setRating(newRating);
 
       const starRating = getStarRating(score);
@@ -124,6 +126,8 @@ export function ResultsModal({
       setThankYouMessage(getThankYouMessage(newRating));
     }
   }, [open, score]);
+
+  console.log("🎭 ResultsModal render - open:", open);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

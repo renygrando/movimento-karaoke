@@ -78,23 +78,40 @@ export function HomeView() {
     setScore(0);
     setCombo(0);
     setFinalScore(0);
+    scoreRef.current = 0;
     playerReadyRef.current = false;
+    videoEndedRef.current = false;
     toast.success("🎤 Tocando agora!", {
       description: `${song.title} - ${song.artist}`,
     });
   };
 
   const handleSongEnd = useCallback(() => {
-    console.log("handleSongEnd called with score:", scoreRef.current);
+    if (videoEndedRef.current) {
+      console.log("handleSongEnd já foi chamado, ignorando...");
+      return;
+    }
+    
+    console.log("🎬 handleSongEnd called with score:", scoreRef.current);
+    videoEndedRef.current = true;
+    
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
     if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
-    console.log("Setting finalScore to:", scoreRef.current);
-    console.log("Setting showResults to true");
-    videoEndedRef.current = true;
-    setFinalScore(scoreRef.current);
-    setShowResults(true);
-    toast.success("🎉 Vídeo finalizado! Confira sua nota!", {
+    
+    const finalScoreValue = scoreRef.current || 0;
+    console.log("📊 Setting finalScore to:", finalScoreValue);
+    console.log("🎉 Setting showResults to true");
+    
+    setFinalScore(finalScoreValue);
+    
+    // Usar setTimeout para garantir que o estado seja atualizado
+    setTimeout(() => {
+      setShowResults(true);
+      console.log("✅ Modal deve estar aberto agora!");
+    }, 100);
+    
+    toast.success("🎉 Música finalizada! Confira sua nota!", {
       duration: 5000,
     });
   }, []);
@@ -180,7 +197,11 @@ export function HomeView() {
             "3": "BUFFERING",
             "5": "VIDEO_CUED",
           };
-          console.log(`📺 Estado do player: ${stateNames[state] || "DESCONHECIDO"} (${state})`);
+          console.log(
+            `📺 Estado do player: ${
+              stateNames[state] || "DESCONHECIDO"
+            } (${state})`
+          );
 
           // 0 = ENDED
           if (state === 0 && !videoEndedRef.current) {
@@ -232,7 +253,11 @@ export function HomeView() {
 
     // Monitora o estado do player a cada segundo
     playerMonitorRef.current = window.setInterval(() => {
-      if (iframeRef.current && iframeRef.current.contentWindow && !videoEndedRef.current) {
+      if (
+        iframeRef.current &&
+        iframeRef.current.contentWindow &&
+        !videoEndedRef.current
+      ) {
         // Requisita informações de tempo do player
         iframeRef.current.contentWindow.postMessage(
           JSON.stringify({ event: "listening" }),
@@ -552,6 +577,22 @@ export function HomeView() {
                   </h3>
                 </div>
                 <MicrophoneVisualizer />
+              </motion.div>
+
+              {/* Botão de Finalizar */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="flex justify-center gap-4"
+              >
+                <Button
+                  onClick={handleSongEnd}
+                  size="lg"
+                  className="gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-['Exo_2'] font-bold px-8 py-6 text-lg rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.5)]"
+                >
+                  🏁 Finalizar e Ver Nota
+                </Button>
               </motion.div>
             </motion.section>
           )}
