@@ -104,20 +104,28 @@ export function ResultsModal({
   songTitle,
   songArtist,
 }: ResultsModalProps) {
+  console.log("🎭 ResultsModal RENDER - Props:", {
+    open,
+    score,
+    songTitle,
+    songArtist,
+  });
+
   const [stars, setStars] = useState(0);
   const [compliment, setCompliment] = useState("");
   const [rating, setRating] = useState(0);
   const [thankYouMessage, setThankYouMessage] = useState("");
 
   useEffect(() => {
-    console.log("ResultsModal effect triggered - open:", open, "score:", score);
+    console.log("🔄 ResultsModal useEffect - open:", open, "score:", score);
     if (open) {
-      console.log("✅ ResultsModal opened with score:", score);
+      console.log("✅ Modal está ABERTO, gerando dados...");
       const newRating = generateRating(score);
-      console.log("📊 Generated rating:", newRating);
+      console.log("📊 Rating gerado:", newRating);
       setRating(newRating);
 
       const starRating = getStarRating(score);
+      console.log("⭐ Estrelas:", starRating);
       setStars(starRating);
 
       setCompliment(
@@ -127,7 +135,7 @@ export function ResultsModal({
     }
   }, [open, score]);
 
-  console.log("🎭 ResultsModal render - open:", open);
+  console.log("🚪 Dialog vai renderizar com open =", open);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

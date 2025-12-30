@@ -37,6 +37,11 @@ export function HomeView() {
     null
   );
   const [finalScore, setFinalScore] = useState(0);
+
+  // Log sempre que showResults mudar
+  useEffect(() => {
+    console.log("🔔 showResults mudou para:", showResults);
+  }, [showResults]);
   const scoreIntervalRef = useRef<number | undefined>(undefined);
   const comboIntervalRef = useRef<number | undefined>(undefined);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -88,29 +93,40 @@ export function HomeView() {
 
   const handleSongEnd = useCallback(() => {
     if (videoEndedRef.current) {
-      console.log("handleSongEnd já foi chamado, ignorando...");
+      console.log("⚠️ handleSongEnd já foi chamado, ignorando...");
       return;
     }
-    
-    console.log("🎬 handleSongEnd called with score:", scoreRef.current);
+
+    console.log("🎬 handleSongEnd INICIADO com score:", scoreRef.current);
+    console.log("🎯 showResults ANTES:", showResults);
     videoEndedRef.current = true;
-    
-    if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
-    if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
-    if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
-    
+
+    if (scoreIntervalRef.current) {
+      clearInterval(scoreIntervalRef.current);
+      console.log("⏹️ Score interval cleared");
+    }
+    if (comboIntervalRef.current) {
+      clearInterval(comboIntervalRef.current);
+      console.log("⏹️ Combo interval cleared");
+    }
+    if (playerMonitorRef.current) {
+      clearInterval(playerMonitorRef.current);
+      console.log("⏹️ Player monitor cleared");
+    }
+
     const finalScoreValue = scoreRef.current || 0;
-    console.log("📊 Setting finalScore to:", finalScoreValue);
-    console.log("🎉 Setting showResults to true");
-    
+    console.log("📊 Final score calculado:", finalScoreValue);
+
     setFinalScore(finalScoreValue);
-    
+    console.log("✅ setFinalScore chamado com:", finalScoreValue);
+
     // Usar setTimeout para garantir que o estado seja atualizado
     setTimeout(() => {
+      console.log("⏰ setTimeout executado - abrindo modal agora!");
       setShowResults(true);
-      console.log("✅ Modal deve estar aberto agora!");
+      console.log("🎉 setShowResults(true) chamado!");
     }, 100);
-    
+
     toast.success("🎉 Música finalizada! Confira sua nota!", {
       duration: 5000,
     });
@@ -165,7 +181,7 @@ export function HomeView() {
 
   useEffect(() => {
     let messageHandler: ((event: MessageEvent) => void) | null = null;
-    
+
     const setupListener = () => {
       messageHandler = (event: MessageEvent) => {
         // Aceita mensagens do YouTube
@@ -178,7 +194,7 @@ export function HomeView() {
 
         try {
           let data = event.data;
-          
+
           // Tenta fazer parse se for string
           if (typeof data === "string") {
             try {
@@ -204,7 +220,7 @@ export function HomeView() {
           // Mudança de estado do player
           if (data.event === "onStateChange") {
             const state = data.info;
-            
+
             if (state === -1) console.log("⏸️ Player: UNSTARTED");
             if (state === 0) console.log("🏁 Player: ENDED");
             if (state === 1) console.log("▶️ Player: PLAYING");
@@ -218,8 +234,27 @@ export function HomeView() {
                 console.log("🎬🎬🎬 VÍDEO TERMINOU! Chamando handleSongEnd");
                 handleSongEnd();
               } else {
-                console.log("⚠️ Vídeo já foi finalizado, ignorando evento duplicado");
+                console.log(
+                  "⚠️ Vídeo já foi finalizado, ignorando evento duplicado"
+                );
               }
+            }
+          }
+
+          // Resposta do getPlayerState (usado pelo polling)
+          if (
+            data.event === "infoDelivery" &&
+            data.info &&
+            typeof data.info.playerState !== "undefined"
+          ) {
+            const state = data.info.playerState;
+
+            // Estado 0 = vídeo terminou
+            if (state === 0 && !videoEndedRef.current) {
+              console.log(
+                "🎯 POLLING detectou fim do vídeo! Chamando handleSongEnd"
+              );
+              handleSongEnd();
             }
           }
 
@@ -269,9 +304,24 @@ export function HomeView() {
       setCombo((prevCombo) => Math.min(prevCombo + 1, 10));
     }, 3000);
 
+    // Polling para verificar estado do player a cada segundo
+    playerMonitorRef.current = window.setInterval(() => {
+      const iframe = iframeRef.current;
+      if (iframe && iframe.contentWindow) {
+        // Solicita o estado atual do player
+        iframe.contentWindow.postMessage(
+          '{"event":"command","func":"getPlayerState","args":""}',
+          "*"
+        );
+      }
+    }, 1000);
+
+    console.log("✅ Polling iniciado para monitorar estado do player");
+
     return () => {
       if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
       if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
+      if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
     };
   }, [currentSong, isReady, combo]);
 
@@ -692,6 +742,23 @@ export function HomeView() {
         songTitle={currentSong?.title || ""}
         songArtist={currentSong?.artist || ""}
       />
+
+      {/* Botão de debug - remover depois */}
+      {currentSong && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button
+            onClick={() => {
+              console.log("🔴 TESTE MANUAL - Forçando abertura do modal");
+              console.log("Score atual:", scoreRef.current);
+              setFinalScore(scoreRef.current);
+              setShowResults(true);
+            }}
+            className="bg-red-500 hover:bg-red-600"
+          >
+            🧪 Testar Modal
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
