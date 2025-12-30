@@ -25,25 +25,30 @@ git push -u origin main
 ### 2. No Easypanel
 
 1. **Crie um novo App**
+
    - Acesse seu projeto no Easypanel
    - Clique em "Create" → "App"
    - Dê um nome: `movimento-karaoke`
 
 2. **Configure o Source**
+
    - Source Type: **Git**
    - Repository: Cole a URL do seu repositório
    - Branch: `main` (ou sua branch principal)
    - Build Method: **Dockerfile**
 
 3. **Configurações de Build**
+
    - Build Context Path: `/`
    - Dockerfile Path: `./Dockerfile`
 
 4. **Configurações de Deploy**
+
    - Port: `80`
    - Protocolo: HTTP
 
 5. **Domínio**
+
    - Configure um domínio customizado ou use o domínio fornecido pelo Easypanel
    - Exemplo: `karaoke.seudominio.com`
 
@@ -109,27 +114,33 @@ Após o deploy:
 ## Atualizações
 
 ### Deploy Automático (Git)
+
 - Cada push para a branch configurada acionará um novo deploy automaticamente
 
 ### Deploy Manual
+
 - No Easypanel, vá até seu app e clique em "Rebuild"
 
 ## Troubleshooting
 
 ### App não inicia
+
 - Verifique os logs no Easypanel
 - Confirme se a porta 80 está correta
 - Verifique se o build completou com sucesso
 
 ### Assets não carregam
+
 - Verifique as configurações do nginx
 - Confirme se o Vite build gerou os arquivos corretamente
 
 ### Service Worker não funciona
+
 - Certifique-se de usar HTTPS (obrigatório para PWA)
 - Verifique se o arquivo `sw.js` está acessível em `/sw.js`
 
 ### YouTube não funciona
+
 - Verifique se as variáveis de ambiente estão corretas
 - Confirme se a API do YouTube está configurada corretamente
 
