@@ -87,34 +87,30 @@ export function HomeView() {
   };
 
   const handleSongEnd = useCallback(() => {
-    console.log("\n\n═══════════════════════════════════════════════════════");
-    console.log("🎬🎬🎬 VÍDEO TERMINOU - Abrindo Modal 🎬🎬🎬");
-    console.log("═══════════════════════════════════════════════════════");
+    console.log("\n🎬 handleSongEnd chamado");
+    console.log("videoEndedRef.current:", videoEndedRef.current);
     
     if (videoEndedRef.current) {
-      console.log("⚠️ Já foi processado");
+      console.log("⚠️ Já processado");
       return;
     }
 
     videoEndedRef.current = true;
 
-    // Limpa todos os intervals
     if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
     if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
     if (endVideoTimeoutRef.current) clearTimeout(endVideoTimeoutRef.current);
 
     const finalScoreValue = scoreRef.current || 0;
-    console.log("📊 Score final:", finalScoreValue);
-    
+    console.log("📊 Score:", finalScoreValue);
+    console.log("🔧 Chamando setFinalScore e setShowResults");
+
     setFinalScore(finalScoreValue);
     setShowResults(true);
-    
-    console.log("✅ Modal aberto!");
-    console.log("═══════════════════════════════════════════════════════\n\n");
 
-    toast.success("🎉 Música finalizada! Confira sua nota!", {
-      duration: 5000,
-    });
+    console.log("✅ setShowResults(true) executado\n");
+
+    toast.success("🎉 Música finalizada!", { duration: 5000 });
   }, []);
 
   useEffect(() => {
@@ -174,10 +170,10 @@ export function HomeView() {
     getVideoDuration(currentSong.youtubeId).then((duration) => {
       if (duration > 0) {
         console.log("⏱️ Vídeo durará:", duration, "segundos");
-        
+
         // Adiciona 2 segundos de buffer para garantir que o vídeo terminou
         const timeToWait = (duration + 2) * 1000;
-        
+
         endVideoTimeoutRef.current = setTimeout(() => {
           console.log("⏰ Timeout acionado - vídeo terminou naturalmente");
           if (!videoEndedRef.current) {
