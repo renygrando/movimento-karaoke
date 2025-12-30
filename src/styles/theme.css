@@ -1,72 +1,72 @@
 @import "tailwindcss";
 
-@import '@radix-ui/colors/sage-dark.css' layer(base);
-@import '@radix-ui/colors/olive.css' layer(base);
-@import '@radix-ui/colors/olive-dark.css' layer(base);
-@import '@radix-ui/colors/sand.css' layer(base);
-@import '@radix-ui/colors/sand-dark.css' layer(base);
-@import '@radix-ui/colors/red.css' layer(base);
-@import '@radix-ui/colors/red-dark.css' layer(base);
-@import '@radix-ui/colors/ruby.css' layer(base);
-@import '@radix-ui/colors/ruby-dark.css' layer(base);
-@import '@radix-ui/colors/crimson.css' layer(base);
-@import '@radix-ui/colors/crimson-dark.css' layer(base);
-@import '@radix-ui/colors/pink.css' layer(base);
-@import '@radix-ui/colors/pink-dark.css' layer(base);
-@import '@radix-ui/colors/plum.css' layer(base);
-@import '@radix-ui/colors/plum-dark.css' layer(base);
-@import '@radix-ui/colors/purple.css' layer(base);
-@import '@radix-ui/colors/purple-dark.css' layer(base);
-@import '@radix-ui/colors/violet.css' layer(base);
-@import '@radix-ui/colors/violet-dark.css' layer(base);
-@import '@radix-ui/colors/iris.css' layer(base);
-@import '@radix-ui/colors/iris-dark.css' layer(base);
-@import '@radix-ui/colors/indigo.css' layer(base);
-@import '@radix-ui/colors/indigo-dark.css' layer(base);
-@import '@radix-ui/colors/blue.css' layer(base);
-@import '@radix-ui/colors/blue-dark.css' layer(base);
-@import '@radix-ui/colors/cyan.css' layer(base);
-@import '@radix-ui/colors/cyan-dark.css' layer(base);
-@import '@radix-ui/colors/teal.css' layer(base);
-@import '@radix-ui/colors/teal-dark.css' layer(base);
-@import '@radix-ui/colors/jade.css' layer(base);
-@import '@radix-ui/colors/jade-dark.css' layer(base);
-@import '@radix-ui/colors/green.css' layer(base);
-@import '@radix-ui/colors/green-dark.css' layer(base);
-@import '@radix-ui/colors/grass.css' layer(base);
-@import '@radix-ui/colors/grass-dark.css' layer(base);
-@import '@radix-ui/colors/bronze.css' layer(base);
-@import '@radix-ui/colors/bronze-dark.css' layer(base);
-@import '@radix-ui/colors/gold.css' layer(base);
-@import '@radix-ui/colors/gold-dark.css' layer(base);
-@import '@radix-ui/colors/brown.css' layer(base);
-@import '@radix-ui/colors/brown-dark.css' layer(base);
-@import '@radix-ui/colors/orange.css' layer(base);
-@import '@radix-ui/colors/orange-dark.css' layer(base);
-@import '@radix-ui/colors/amber.css' layer(base);
-@import '@radix-ui/colors/amber-dark.css' layer(base);
-@import '@radix-ui/colors/yellow.css' layer(base);
-@import '@radix-ui/colors/yellow-dark.css' layer(base);
-@import '@radix-ui/colors/lime.css' layer(base);
-@import '@radix-ui/colors/lime-dark.css' layer(base);
-@import '@radix-ui/colors/mint.css' layer(base);
-@import '@radix-ui/colors/mint-dark.css' layer(base);
-@import '@radix-ui/colors/sky.css' layer(base);
-@import '@radix-ui/colors/sky-dark.css' layer(base);
-@import '@radix-ui/colors/tomato.css' layer(base);
-@import '@radix-ui/colors/tomato-dark.css' layer(base);
-@import '@radix-ui/colors/gray.css' layer(base);
-@import '@radix-ui/colors/gray-dark.css' layer(base);
-@import '@radix-ui/colors/mauve.css' layer(base);
-@import '@radix-ui/colors/mauve-dark.css' layer(base);
-@import '@radix-ui/colors/slate.css' layer(base);
-@import '@radix-ui/colors/slate-dark.css' layer(base);
-@import '@radix-ui/colors/slate-alpha.css' layer(base);
-@import '@radix-ui/colors/slate-dark-alpha.css' layer(base);
+@import "@radix-ui/colors/sage-dark.css" layer(base);
+@import "@radix-ui/colors/olive.css" layer(base);
+@import "@radix-ui/colors/olive-dark.css" layer(base);
+@import "@radix-ui/colors/sand.css" layer(base);
+@import "@radix-ui/colors/sand-dark.css" layer(base);
+@import "@radix-ui/colors/red.css" layer(base);
+@import "@radix-ui/colors/red-dark.css" layer(base);
+@import "@radix-ui/colors/ruby.css" layer(base);
+@import "@radix-ui/colors/ruby-dark.css" layer(base);
+@import "@radix-ui/colors/crimson.css" layer(base);
+@import "@radix-ui/colors/crimson-dark.css" layer(base);
+@import "@radix-ui/colors/pink.css" layer(base);
+@import "@radix-ui/colors/pink-dark.css" layer(base);
+@import "@radix-ui/colors/plum.css" layer(base);
+@import "@radix-ui/colors/plum-dark.css" layer(base);
+@import "@radix-ui/colors/purple.css" layer(base);
+@import "@radix-ui/colors/purple-dark.css" layer(base);
+@import "@radix-ui/colors/violet.css" layer(base);
+@import "@radix-ui/colors/violet-dark.css" layer(base);
+@import "@radix-ui/colors/iris.css" layer(base);
+@import "@radix-ui/colors/iris-dark.css" layer(base);
+@import "@radix-ui/colors/indigo.css" layer(base);
+@import "@radix-ui/colors/indigo-dark.css" layer(base);
+@import "@radix-ui/colors/blue.css" layer(base);
+@import "@radix-ui/colors/blue-dark.css" layer(base);
+@import "@radix-ui/colors/cyan.css" layer(base);
+@import "@radix-ui/colors/cyan-dark.css" layer(base);
+@import "@radix-ui/colors/teal.css" layer(base);
+@import "@radix-ui/colors/teal-dark.css" layer(base);
+@import "@radix-ui/colors/jade.css" layer(base);
+@import "@radix-ui/colors/jade-dark.css" layer(base);
+@import "@radix-ui/colors/green.css" layer(base);
+@import "@radix-ui/colors/green-dark.css" layer(base);
+@import "@radix-ui/colors/grass.css" layer(base);
+@import "@radix-ui/colors/grass-dark.css" layer(base);
+@import "@radix-ui/colors/bronze.css" layer(base);
+@import "@radix-ui/colors/bronze-dark.css" layer(base);
+@import "@radix-ui/colors/gold.css" layer(base);
+@import "@radix-ui/colors/gold-dark.css" layer(base);
+@import "@radix-ui/colors/brown.css" layer(base);
+@import "@radix-ui/colors/brown-dark.css" layer(base);
+@import "@radix-ui/colors/orange.css" layer(base);
+@import "@radix-ui/colors/orange-dark.css" layer(base);
+@import "@radix-ui/colors/amber.css" layer(base);
+@import "@radix-ui/colors/amber-dark.css" layer(base);
+@import "@radix-ui/colors/yellow.css" layer(base);
+@import "@radix-ui/colors/yellow-dark.css" layer(base);
+@import "@radix-ui/colors/lime.css" layer(base);
+@import "@radix-ui/colors/lime-dark.css" layer(base);
+@import "@radix-ui/colors/mint.css" layer(base);
+@import "@radix-ui/colors/mint-dark.css" layer(base);
+@import "@radix-ui/colors/sky.css" layer(base);
+@import "@radix-ui/colors/sky-dark.css" layer(base);
+@import "@radix-ui/colors/tomato.css" layer(base);
+@import "@radix-ui/colors/tomato-dark.css" layer(base);
+@import "@radix-ui/colors/gray.css" layer(base);
+@import "@radix-ui/colors/gray-dark.css" layer(base);
+@import "@radix-ui/colors/mauve.css" layer(base);
+@import "@radix-ui/colors/mauve-dark.css" layer(base);
+@import "@radix-ui/colors/slate.css" layer(base);
+@import "@radix-ui/colors/slate-dark.css" layer(base);
+@import "@radix-ui/colors/slate-alpha.css" layer(base);
+@import "@radix-ui/colors/slate-dark-alpha.css" layer(base);
 
-@import 'tailwindcss/theme' layer(theme);
+@import "tailwindcss/theme" layer(theme);
 
-@import 'tailwindcss/preflight' layer(base);
+@import "tailwindcss/preflight" layer(base);
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
@@ -83,6 +83,70 @@
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
+  }
+
+  /* Custom Karaoke Theme */
+  :root {
+    --karaoke-primary: #ff006e;
+    --karaoke-secondary: #8338ec;
+    --karaoke-accent: #3a86ff;
+    --karaoke-success: #06ffa5;
+    --karaoke-bg-dark: #0a0118;
+    --karaoke-bg-card: #1a0f2e;
+    --karaoke-glow: rgba(131, 56, 236, 0.3);
+  }
+
+  body {
+    background: linear-gradient(135deg, #0a0118 0%, #1a0f2e 50%, #0f0a1e 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Karaoke animated background */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-20px) rotate(5deg);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 20px var(--karaoke-glow), 0 0 40px var(--karaoke-glow);
+    }
+    50% {
+      box-shadow: 0 0 30px var(--karaoke-glow), 0 0 60px var(--karaoke-glow);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  @keyframes note-float {
+    0% {
+      transform: translateY(100vh) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100px) rotate(360deg);
+      opacity: 0;
+    }
   }
 }
 
@@ -258,5 +322,54 @@
     --color-bg: var(--color-neutral-1);
     --color-bg-inset: #000000;
     --color-bg-overlay: var(--color-neutral-3);
+  }
+
+  /* Karaoke Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(10, 1, 24, 0.5);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #8338ec, #ff006e);
+    border-radius: 10px;
+    border: 2px solid rgba(10, 1, 24, 0.5);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #a855f7, #ff1a8c);
+  }
+}
+
+/* Additional Karaoke Utilities */
+@layer utilities {
+  .glow-text {
+    text-shadow: 0 0 20px rgba(131, 56, 236, 0.6),
+      0 0 40px rgba(255, 0, 110, 0.4);
+  }
+
+  .glass-card {
+    background: rgba(26, 15, 46, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(131, 56, 236, 0.2);
+  }
+
+  .neon-border {
+    border: 2px solid rgba(131, 56, 236, 0.5);
+    box-shadow: 0 0 20px rgba(131, 56, 236, 0.3),
+      inset 0 0 20px rgba(131, 56, 236, 0.1);
+  }
+
+  .music-note {
+    animation: note-float 8s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
