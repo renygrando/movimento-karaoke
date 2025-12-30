@@ -87,45 +87,37 @@ export function HomeView() {
   };
 
   const handleSongEnd = useCallback(() => {
-    console.log("\n\n🎬🎬🎬 =============== handleSongEnd CHAMADO ===============");
+    console.log("\n\n");
+    console.log("═══════════════════════════════════════════════════════");
+    console.log("🎬🎬🎬 handleSongEnd EXECUTANDO 🎬🎬🎬");
+    console.log("═══════════════════════════════════════════════════════");
     console.log("videoEndedRef.current:", videoEndedRef.current);
     console.log("scoreRef.current:", scoreRef.current);
     
     if (videoEndedRef.current) {
-      console.log("⚠️ Já foi chamado, ignorando...");
+      console.log("⚠️ Já foi chamado antes, ignorando");
+      console.log("═══════════════════════════════════════════════════════\n\n");
       return;
     }
 
-    console.log("✅ Processando fim do vídeo...");
     videoEndedRef.current = true;
 
     // Limpa todos os intervals
-    if (scoreIntervalRef.current) {
-      clearInterval(scoreIntervalRef.current);
-      console.log("✅ Score interval limpo");
-    }
-    if (comboIntervalRef.current) {
-      clearInterval(comboIntervalRef.current);
-      console.log("✅ Combo interval limpo");
-    }
-    if (playerMonitorRef.current) {
-      clearInterval(playerMonitorRef.current);
-      console.log("✅ Player monitor limpo");
-    }
+    if (scoreIntervalRef.current) clearInterval(scoreIntervalRef.current);
+    if (comboIntervalRef.current) clearInterval(comboIntervalRef.current);
+    if (playerMonitorRef.current) clearInterval(playerMonitorRef.current);
 
     const finalScoreValue = scoreRef.current || 0;
     console.log("📊 Score final:", finalScoreValue);
 
-    // Define o score
-    console.log("Chamando setFinalScore com:", finalScoreValue);
+    console.log("Executando: setFinalScore(" + finalScoreValue + ")");
     setFinalScore(finalScoreValue);
     
-    // Abre o modal
-    console.log("Chamando setShowResults(true)");
+    console.log("Executando: setShowResults(true)");
     setShowResults(true);
     
-    console.log("✅ MODAL DEVERIA ESTAR ABERTO AGORA!");
-    console.log("===============================================\n\n");
+    console.log("✅ MODAL DEVERIA ESTAR ABERTO!");
+    console.log("═══════════════════════════════════════════════════════\n\n");
 
     toast.success("🎉 Música finalizada! Confira sua nota!", {
       duration: 5000,
@@ -184,30 +176,39 @@ export function HomeView() {
 
     const setupListener = () => {
       messageHandler = (event: MessageEvent) => {
-        console.log("📨 Mensagem recebida do origin:", event.origin);
-        
         try {
           let data = event.data;
           
-          console.log("📦 Data recebida (tipo:", typeof data, "):", data);
+          // Se for string vazia ou undefined, ignora
+          if (!data) {
+            return;
+          }
 
           // Tenta fazer parse se for string
           if (typeof data === "string") {
+            // Se for string vazia, ignora
+            if (data.trim() === "") {
+              return;
+            }
+            
             try {
               data = JSON.parse(data);
-              console.log("✅ JSON parseado com sucesso");
             } catch {
-              console.log("❌ Erro ao fazer parse do JSON");
-              return; // Ignora se não for JSON válido
+              // Se não conseguir fazer parse, ignora silenciosamente
+              return;
             }
           }
 
           if (!data || typeof data !== "object") {
-            console.log("❌ Data não é um objeto válido");
             return;
           }
 
-          console.log("🎯 Event recebido:", data.event);
+          // Verifica se tem event
+          if (!data.event) {
+            return;
+          }
+
+          console.log("🎯 Event recebido:", data.event, "Info:", data.info);
 
           // Player pronto
           if (data.event === "onReady") {
@@ -221,37 +222,25 @@ export function HomeView() {
           // Mudança de estado do player
           if (data.event === "onStateChange") {
             const state = data.info;
-            console.log("🔄 Estado do player mudou para:", state);
+            console.log("🔄 onStateChange - Estado:", state);
 
-            if (state === -1) console.log("⏸️ UNSTARTED");
-            if (state === 0) console.log("🏁 ENDED - VÍDEO TERMINOU!");
-            if (state === 1) console.log("▶️ PLAYING");
-            if (state === 2) console.log("⏸️ PAUSED");
-            if (state === 3) console.log("⏳ BUFFERING");
-            if (state === 5) console.log("📼 CUED");
-
-            // ESTADO 0 = VÍDEO TERMINOU
             if (state === 0) {
-              console.log("videoEndedRef.current antes:", videoEndedRef.current);
+              console.log("🏁 VÍDEO TERMINOU (state = 0)!");
               if (!videoEndedRef.current) {
-                console.log("🎬🎬🎬 CHAMANDO handleSongEnd AGORA!!!");
+                console.log("🎬 Chamando handleSongEnd");
                 handleSongEnd();
-              } else {
-                console.log("⚠️ Já foi finalizado, ignorando");
               }
             }
           }
 
           // Resposta do getPlayerState (usado pelo polling)
-          if (data.event === "infoDelivery") {
-            console.log("📊 infoDelivery recebido");
-            if (data.info && typeof data.info.playerState !== "undefined") {
+          if (data.event === "infoDelivery" && data.info) {
+            if (typeof data.info.playerState !== "undefined") {
               const state = data.info.playerState;
-              console.log("🎯 Polling - Estado atual:", state);
+              console.log("📊 infoDelivery - playerState:", state);
 
-              // Estado 0 = vídeo terminou
               if (state === 0 && !videoEndedRef.current) {
-                console.log("🎯 POLLING CHAMANDO handleSongEnd!!!");
+                console.log("🎯 POLLING detectou fim!");
                 handleSongEnd();
               }
             }
@@ -263,7 +252,7 @@ export function HomeView() {
             handlePlayerError();
           }
         } catch (error) {
-          console.error("❌ Erro ao processar mensagem:", error);
+          console.error("Erro ao processar mensagem:", error);
         }
       };
 
